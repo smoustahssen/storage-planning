@@ -9,7 +9,6 @@ import { syncROS } from "../sync/rosSync.js";
 import { FixtureOrgDirectory } from "../ros/fixture.js";
 import { sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { SARA_M_ROS_ID } from "../ros/fixture.js";
 
 // ─── Name → rosId lookup ─────────────────────────────────────────────────────
 
@@ -59,6 +58,8 @@ const NAME_TO_ROS_ID: Record<string, string> = {
   "Danny Avhad":       "ros_danny_avhad",
   "Ravi Gullapalli":   "ros_ravi_gullapalli",
   "Gopal Anand":       "ros_gopal_anand",
+  "Vikash Singh":      "ros_vikash_singh",
+  "Danny Yuan":        "ros_danny_yuan",
 };
 
 function resolveRosId(name: string): string {
@@ -127,7 +128,7 @@ async function seed() {
   }
 
   // ── Admin grant ────────────────────────────────────────────────────────
-  db.run(sql.raw(`INSERT OR IGNORE INTO access_grant(ros_id, role, scope) VALUES ('${SARA_M_ROS_ID}', 'admin', 'All')`));
+  db.run(sql.raw(`INSERT OR IGNORE INTO email_access(email, role, scope) VALUES ('sara.m@roblox.com', 'admin', 'All')`));
 
   // ══════════════════════════════════════════════════════════════════════
   // Q2 2026  (locked, previous quarter)
@@ -149,7 +150,11 @@ async function seed() {
     { id: "vsearch",   team: "RDB-PG", name: "Vector search on RDB",                    theme: "Cust Exp",   pri: "P1", deliverables: "POC validated by MLP. Dedicated RDB cluster w/ HA + backup in CHI.", metrics: "POC live; dedicated cluster HA + backup" },
     { id: "qaascreator",team: "QaaS",  name: "Onboard Creator + Safety from SQS",       theme: "Cust Exp",   pri: "P1", deliverables: "Managed QaaS Kafka Connect. Zero-loss message delivery.", metrics: "Zero-loss delivery validated; both live on QaaS" },
     { id: "r3dr",      team: "R3",     name: "Disaster recovery: cross-region",          theme: "Reliability", pri: "P1", deliverables: "Cross-region replication CHI↔ASH, RPO ≤30s for 100% DMR.", metrics: "Replication live; RPO ≤30s; DR drill passed" },
-    { id: "r3ec",      team: "R3",     name: "Erasure coding EC(6,4)",                   theme: "Reliability", pri: "P1", deliverables: "Adopt EC(6,4) across R3 fleet for 11-nines durability during patching.", metrics: "11-nines durability from 9-nines" },
+    { id: "r3ec",        team: "R3",     name: "Erasure coding EC(6,4)",                                  theme: "Reliability", pri: "P1", deliverables: "Adopt EC(6,4) across R3 fleet for 11-nines durability during patching.", metrics: "11-nines durability from 9-nines" },
+    { id: "grimlock",    team: "All",    name: "Grimlock POC",                                            theme: "Security",    pri: "P1", deliverables: "POC for pod identity management. Enable SPIFFE/SPIRE-based workload identity for Storage fleet.", metrics: "Grimlock POC reviewed; workload identity design signed off by InfraSec" },
+    { id: "pgfound",     team: "RDB-PG", name: "RDB-PG Engine Foundation: Logical B&R + PITR + Cell HA", theme: "Reliability", pri: "P1", deliverables: "Logical backup & restore, point-in-time recovery, and cell HA for RDB-PG.", metrics: "B&R validated; PITR RPO ≤1h; Cell HA drill passing" },
+    { id: "r3features",  team: "R3",     name: "R3 Feature Support for Asset Migration",                 theme: "Cust Exp",    pri: "P1", deliverables: "R3 features required to unblock asset pipeline migration use cases.", metrics: "Asset migration unblocked on R3; ≥1 use case live" },
+    { id: "evmigration", team: "MS SQL", name: "EV1 / MSSQL → EaaS Large Table Migration",              theme: "Efficiency",  pri: "P1", deliverables: "Data-path tooling to migrate large EV1 and MS SQL tables onto EaaS.", metrics: "≥1 large table migrated to EaaS; migration runbook published" },
   ];
   for (const i of q2Initiatives) insertInitiative({ ...i, quarterId: Q2, status: "committed" });
 
@@ -173,13 +178,13 @@ async function seed() {
     ["Peter Yao","ktlo",0.5],["Julian Kudszus","ktlo",1.0],
     ["Weiji Hu","ktlo",0.2],["Leon Gao","ktlo",0.2],["Leo Luo","ktlo",0.2],["Ankur Kulshrestha","ktlo",0.2],["Derek Pham","ktlo",0.2],["Julien Mo","ktlo",0.2],["Yue Luo","ktlo",0.2],
     ["Will Hodges","ktlo",0.2],["Shenglin Du","ktlo",0.2],["Fred Liu","ktlo",0.2],["Gavin Wang","ktlo",0.2],["Hieu Pham","ktlo",0.2],["George Li","ktlo",0.2],["Jose Manjarrez","ktlo",0.2],
-    ["Rahul Yadav","ktlo",1.0],["Danny Avhad","ktlo",0.2],["Gopal Anand","ktlo",0.2],
+    ["Rahul Yadav","ktlo",1.0],["Danny Avhad","ktlo",0.2],["Ravi Gullapalli","ktlo",0.2],["Gopal Anand","ktlo",0.2],
     ["Zhixin Wen","creator",0.5],["Will Hodges","creator",0.8],["Stephen Ma","creator",0.8],["Trung Dinh","creator",0.3],
-    ["Meng Xu","cell",0.8],["Michael Krishnan","cell",0.8],["Shenglin Du","cell",0.8],["Austen Schunk","cell",0.8],["Hieu Pham","cell",0.8],["Haocheng Zuo","cell",1.0],["Zhixin Wen","cell",0.3],
+    ["Meng Xu","cell",0.8],["Michael Krishnan","cell",0.8],["Shenglin Du","cell",0.8],["Austen Schunk","cell",0.8],["Hieu Pham","cell",0.8],["Haocheng Zuo","cell",0.5],["Zhixin Wen","cell",0.3],
     ["Trung Dinh","flow",0.5],["Cory Zhao","flow",0.6],["Zhengyin Qian","flow",0.8],["Nathan Zhang","flow",0.2],
     ["Shiming Song","staging",0.6],["Jin Wang","staging",0.7],["Weiji Hu","staging",0.8],["Fred Liu","staging",0.8],
     ["Nathan Zhang","cacherust",0.5],["Cory Zhao","cacherust",0.2],
-    ["Pranish Pantha","secrets",0.4],["Leo Luo","secrets",0.8],["Peter Yao","secrets",0.5],["Ravi Gullapalli","secrets",0.8],["George Li","secrets",0.8],["Qinghua Chen","secrets",0.5],["Gavin Wang","secrets",0.3],["Steven Wang","secrets",0.5],
+    ["Pranish Pantha","secrets",0.4],["Leo Luo","secrets",0.8],["Peter Yao","secrets",0.5],["Ravi Gullapalli","secrets",0.8],["George Li","secrets",0.8],["Qinghua Chen","secrets",0.5],["Steven Wang","secrets",0.5],
     ["Julien Mo","ssh",0.8],["Manav Kapoor","ssh",0.2],["Jose Manjarrez","ssh",0.2],["Danny Avhad","ssh",0.6],
     ["Anders Persson","raasstd",0.8],["Utkarsh Singh","raasstd",0.8],["Vineesha Kasireddy","raasstd",0.8],["Pranish Pantha","raasstd",0.2],
     ["Jose Manjarrez","crdbrel",0.7],["Manav Kapoor","crdbrel",0.7],["Steven Wang","crdbrel",0.5],["Qinghua Chen","crdbrel",0.5],["Gavin Wang","crdbrel",0.8],
@@ -188,6 +193,8 @@ async function seed() {
     ["Huizhi Lu","qaascreator",1.0],
     ["Ankur Kulshrestha","r3dr",0.8],
     ["Leon Gao","r3ec",0.8],
+    ["Vikash Singh","pgfound",1.0],["Haocheng Zuo","pgfound",0.5],
+    ["Derek Pham","r3features",0.8],
   ];
   for (const [name, initId, pct] of q2Asg) insertAssignment(Q2, name, initId, pct);
 
@@ -238,8 +245,8 @@ async function seed() {
     ["Sen Li","k3ktlo",0.5],["Anders Persson","k3ktlo",0.2],["Utkarsh Singh","k3ktlo",0.2],["Pranish Pantha","k3ktlo",0.4],
     ["Peter Yao","k3ktlo",0.5],["Julian Kudszus","k3ktlo",1.0],
     ["Weiji Hu","k3ktlo",0.3],["Leon Gao","k3ktlo",0.3],["Leo Luo","k3ktlo",0.3],["Ankur Kulshrestha","k3ktlo",0.3],["Derek Pham","k3ktlo",0.3],["Yue Luo","k3ktlo",0.3],
-    ["Fred Liu","k3ktlo",0.3],["Gavin Wang","k3ktlo",0.2],["George Li","k3ktlo",0.2],["Jose Manjarrez","k3ktlo",0.2],
-    ["Rahul Yadav","k3ktlo",1.0],["Danny Avhad","k3ktlo",0.3],["Gopal Anand","k3ktlo",0.2],
+    ["Fred Liu","k3ktlo",0.3],["Gavin Wang","k3ktlo",0.2],["George Li","k3ktlo",0.2],["Jose Manjarrez","k3ktlo",0.2],["Danny Yuan","k3ktlo",0.2],
+    ["Rahul Yadav","k3ktlo",1.0],["Danny Avhad","k3ktlo",0.3],["Ravi Gullapalli","k3ktlo",0.2],["Vikash Singh","k3ktlo",0.2],["Gopal Anand","k3ktlo",0.2],
     ["Meng Xu","k3cell",0.8],["Michael Krishnan","k3cell",0.8],["Shenglin Du","k3cell",0.8],["Austen Schunk","k3cell",0.6],["Haocheng Zuo","k3cell",1.0],
     ["Zhixin Wen","k3creator",0.6],["Will Hodges","k3creator",0.8],["Stephen Ma","k3creator",0.8],
     ["Trung Dinh","k3cdc",0.8],["Hieu Pham","k3cdc",0.8],["Michael Krishnan","k3cdc",0.2],

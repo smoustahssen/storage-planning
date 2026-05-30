@@ -30,7 +30,7 @@ const FIXTURE_PEOPLE: OrgPerson[] = [
   { rosId: "ros_yingjie_he",       name: "Yingjie He",         email: "yingjie.he@roblox.com",         role: "Manager", homeTeam: "RDB-PG",  managerRosId: "ros_yawei_li",          active: true },
   { rosId: "ros_bing_yang",        name: "Bing Yang",          email: "bing.yang@roblox.com",          role: "IC",      homeTeam: "RDB-PG",  managerRosId: "ros_yingjie_he",        active: true },
   { rosId: "ros_shichao_jin",      name: "Shichao Jin",        email: "shichao.jin@roblox.com",        role: "IC",      homeTeam: "RDB-PG",  managerRosId: "ros_yingjie_he",        active: true },
-  { rosId: "ros_steven_wang",      name: "Steven Wang",        email: "steven.wang@roblox.com",        role: "IC",      homeTeam: "RDB-PG",  managerRosId: "ros_yingjie_he",        active: true },
+  { rosId: "ros_steven_wang",      name: "Steven Wang",        email: "steven.wang@roblox.com",        role: "IC",      homeTeam: "MS SQL",  managerRosId: "ros_gopal_anand",       active: true },
 
   // ── EaaS ─────────────────────────────────────────────────────────────────
   { rosId: "ros_kai_liu",          name: "Kai Liu",            email: "kai.liu@roblox.com",            role: "Manager", homeTeam: "EaaS",    managerRosId: "ros_yawei_li",          active: true },
@@ -83,6 +83,8 @@ const FIXTURE_PEOPLE: OrgPerson[] = [
   { rosId: "ros_rahul_yadav",      name: "Rahul Yadav",        email: "rahul.yadav@roblox.com",        role: "IC",      homeTeam: "MS SQL",  managerRosId: "ros_gopal_anand",       active: true },
   { rosId: "ros_danny_avhad",      name: "Danny Avhad",        email: "danny.avhad@roblox.com",        role: "IC",      homeTeam: "MS SQL",  managerRosId: "ros_gopal_anand",       active: true },
   { rosId: "ros_ravi_gullapalli",  name: "Ravi Gullapalli",    email: "ravi.gullapalli@roblox.com",    role: "IC",      homeTeam: "MS SQL",  managerRosId: "ros_gopal_anand",       active: true },
+  { rosId: "ros_vikash_singh",     name: "Vikash Singh",       email: "vikash.singh@roblox.com",       role: "IC",      homeTeam: "MS SQL",  managerRosId: "ros_gopal_anand",       active: true },
+  { rosId: "ros_danny_yuan",       name: "Danny Yuan",         email: "danny.yuan@roblox.com",         role: "Manager", homeTeam: "SIM",     managerRosId: "ros_yawei_li",          active: true },
 ];
 
 function getSubtree(rootId: string, all: OrgPerson[]): OrgPerson[] {
