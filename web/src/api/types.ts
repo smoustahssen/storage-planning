@@ -117,11 +117,9 @@ export interface PlanResponse {
 }
 
 export interface AccessGrant {
-  rosId: string;
+  email: string;
   role: UserRole;
   scope: string;
-  name: string;
-  email: string;
 }
 
 export interface AuditEntry {

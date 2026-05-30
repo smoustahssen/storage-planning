@@ -84,16 +84,22 @@ const MIGRATIONS = [
   );
   `,
 
-  // 002 – auth sessions
+  // 002 – auth sessions (kept for schema history, no longer used)
   `
   CREATE TABLE IF NOT EXISTS session (
     token      TEXT PRIMARY KEY,
-    ros_id     TEXT NOT NULL REFERENCES person(ros_id) ON DELETE CASCADE,
+    ros_id     TEXT NOT NULL,
     expires_at TEXT NOT NULL DEFAULT (datetime('now', '+8 hours'))
   )
   `,
+
+  // 003 – email-based access grants
   `
-  CREATE INDEX IF NOT EXISTS idx_session_ros_id ON session(ros_id)
+  CREATE TABLE IF NOT EXISTS email_access (
+    email TEXT PRIMARY KEY,
+    role  TEXT NOT NULL CHECK (role IN ('admin','editor')),
+    scope TEXT NOT NULL DEFAULT 'All'
+  )
   `,
 ];
 

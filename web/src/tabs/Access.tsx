@@ -10,26 +10,25 @@ interface Props {
 const TEAMS = ["RDB-KV", "RDB-PG", "EaaS", "RaaS", "QaaS", "R3", "SIM", "MS SQL", "All"];
 
 const MATRIX_ROWS = [
-  ["View all tabs",                                  "✓",             "✓ (own team)",   "✓"],
-  ["Create/edit/delete initiatives",                 "✓",             "✓ (own team)",   "—"],
-  ["Commit / defer initiatives",                     "✓",             "✓ (own team)",   "—"],
-  ["Manage assignments",                             "✓",             "✓ (own team)",   "—"],
-  ["Lend engineers from own team",                   "✓",             "✓ (own team)",   "—"],
-  ["Edit initiative theme",                          "✓",             "— (admin only)", "—"],
-  ["Edit top priorities",                            "✓",             "—",              "—"],
-  ["Manage access grants",                           "✓",             "—",              "—"],
-  ["Lock / unlock quarters",                         "✓",             "—",              "—"],
+  ["View all tabs",                     "✓",             "✓ (own team)",   "✓"],
+  ["Create/edit/delete initiatives",    "✓",             "✓ (own team)",   "—"],
+  ["Commit / defer initiatives",        "✓",             "✓ (own team)",   "—"],
+  ["Manage assignments",                "✓",             "✓ (own team)",   "—"],
+  ["Lend engineers from own team",      "✓",             "✓ (own team)",   "—"],
+  ["Edit initiative theme",             "✓",             "— (admin only)", "—"],
+  ["Edit top priorities",               "✓",             "—",              "—"],
+  ["Manage access grants",              "✓",             "—",              "—"],
+  ["Lock / unlock quarters",            "✓",             "—",              "—"],
 ];
 
 export function Access({ quarterId, me }: Props) {
-  const [grants, setGrants]           = useState<AccessGrant[]>([]);
-  const [audit, setAudit]             = useState<AuditEntry[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [addRosId, setAddRosId]       = useState("");
-  const [addRole, setAddRole]         = useState<"admin" | "editor">("editor");
-  const [addScope, setAddScope]       = useState("RDB-KV");
-  const [peopleSearch, setPeopleSearch] = useState<Array<{ rosId: string; name: string; email: string }>>([]);
-  const [error, setError]             = useState<string | null>(null);
+  const [grants, setGrants]   = useState<AccessGrant[]>([]);
+  const [audit, setAudit]     = useState<AuditEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [addEmail, setAddEmail] = useState("");
+  const [addRole, setAddRole]   = useState<"admin" | "editor">("editor");
+  const [addScope, setAddScope] = useState("RDB-KV");
+  const [error, setError]       = useState<string | null>(null);
   const isAdmin = me.role === "admin";
 
   async function load() {
@@ -43,42 +42,46 @@ export function Access({ quarterId, me }: Props) {
 
   useEffect(() => { load().catch(console.error).finally(() => setLoading(false)); }, [quarterId]);
 
-  async function handleRevoke(rosId: string) {
-    if (!confirm("Revoke access for this person?")) return;
-    try { await api.access.revoke(rosId); load(); }
+  async function handleRevoke(email: string) {
+    if (!confirm(`Revoke elevated access for ${email}? They'll go back to viewer.`)) return;
+    try { await api.access.revoke(email); load(); }
     catch (e) { setError(e instanceof Error ? e.message : "Failed"); }
   }
 
-  async function handleSet(rosId: string, role: "admin" | "editor", scope: string) {
-    try { await api.access.set(rosId, role, scope); load(); }
+  async function handleSet(email: string, role: "admin" | "editor", scope: string) {
+    try { await api.access.set(email, role, scope); load(); }
     catch (e) { setError(e instanceof Error ? e.message : "Failed"); }
   }
 
   async function handleRevokeAll() {
-    if (!confirm("Revoke all non-admin grants?")) return;
+    if (!confirm("Revoke all editor access? Admins are kept.")) return;
     try { await api.access.revokeAll(); load(); }
     catch (e) { setError(e instanceof Error ? e.message : "Failed"); }
   }
 
-  async function searchPeople(q: string) {
-    if (!q) { setPeopleSearch([]); return; }
-    try {
-      const { people } = await api.people.search(q);
-      setPeopleSearch(people.map((p) => ({ rosId: p.rosId, name: p.name, email: p.email })));
-    } catch {}
-  }
-
   async function handleAdd() {
-    if (!addRosId) return;
-    try { await api.access.set(addRosId, addRole, addScope); setAddRosId(""); setPeopleSearch([]); load(); }
-    catch (e) { setError(e instanceof Error ? e.message : "Failed"); }
+    const email = addEmail.trim().toLowerCase();
+    if (!email.endsWith("@roblox.com")) {
+      setError("Must be a @roblox.com email");
+      return;
+    }
+    try {
+      await api.access.set(email, addRole, addRole === "admin" ? "All" : addScope);
+      setAddEmail("");
+      setError(null);
+      load();
+    } catch (e) { setError(e instanceof Error ? e.message : "Failed"); }
   }
 
   if (loading) return <div className="spin">Loading…</div>;
 
   return (
     <div>
-      {error && <div style={{ background: "var(--red-soft)", color: "var(--red)", padding: "9px 14px", borderRadius: 8, marginBottom: 14, fontSize: 12 }}>{error}</div>}
+      {error && (
+        <div style={{ background: "var(--red-soft)", color: "var(--red)", padding: "9px 14px", borderRadius: 8, marginBottom: 14, fontSize: 12 }}>
+          {error}
+        </div>
+      )}
 
       {/* ── Role matrix ── */}
       <div className="panel" style={{ marginBottom: 16 }}>
@@ -113,28 +116,23 @@ export function Access({ quarterId, me }: Props) {
           <h3>People &amp; Access</h3>
           {isAdmin && (
             <button className="warnbtn" style={{ marginLeft: "auto" }} onClick={handleRevokeAll}>
-              Revoke all non-admin
+              Revoke all editors
             </button>
           )}
         </div>
 
         {isAdmin && (
           <div style={{ padding: "12px 18px", borderBottom: "1px solid var(--line)", display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap" }}>
-            <div style={{ flex: 2, minWidth: 180, position: "relative" }}>
-              <label className="fl">Add person</label>
-              <input className="fin" type="text" placeholder="Search by name or email…"
-                onChange={(e) => searchPeople(e.target.value)} />
-              {peopleSearch.length > 0 && (
-                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "1px solid var(--line)", borderRadius: 8, zIndex: 10 }}>
-                  {peopleSearch.map((p) => (
-                    <div key={p.rosId} style={{ padding: "6px 10px", cursor: "pointer", fontSize: 12 }}
-                      onMouseDown={() => { setAddRosId(p.rosId); setPeopleSearch([]); }}>
-                      {p.name} — <span style={{ color: "var(--muted)" }}>{p.email}</span>
-                      {addRosId === p.rosId && " ✓"}
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div style={{ flex: 2, minWidth: 220 }}>
+              <label className="fl">Grant access — @roblox.com email</label>
+              <input
+                className="fin"
+                type="email"
+                placeholder="name@roblox.com"
+                value={addEmail}
+                onChange={(e) => { setAddEmail(e.target.value); setError(null); }}
+                onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              />
             </div>
             <div style={{ width: 120 }}>
               <label className="fl">Role</label>
@@ -151,7 +149,7 @@ export function Access({ quarterId, me }: Props) {
                 </select>
               </div>
             )}
-            <button className="addbtn" onClick={handleAdd} disabled={!addRosId}>Add</button>
+            <button className="addbtn" onClick={handleAdd} disabled={!addEmail}>Grant</button>
           </div>
         )}
 
@@ -159,7 +157,6 @@ export function Access({ quarterId, me }: Props) {
           <table>
             <thead>
               <tr>
-                <th>Person</th>
                 <th>Email</th>
                 <th>Role</th>
                 <th>Scope</th>
@@ -168,13 +165,15 @@ export function Access({ quarterId, me }: Props) {
             </thead>
             <tbody>
               {grants.map((g) => (
-                <tr key={g.rosId} className="rrow">
-                  <td style={{ fontWeight: 500 }}>{g.name}</td>
-                  <td style={{ fontSize: 12, color: "var(--muted)" }}>{g.email}</td>
+                <tr key={g.email} className="rrow">
+                  <td style={{ fontWeight: 500 }}>{g.email}</td>
                   <td>
                     {isAdmin ? (
-                      <select style={{ fontSize: 12, border: "1px solid var(--line)", borderRadius: 6, padding: "3px 6px" }}
-                        value={g.role} onChange={(e) => handleSet(g.rosId, e.target.value as "admin" | "editor", g.scope)}>
+                      <select
+                        style={{ fontSize: 12, border: "1px solid var(--line)", borderRadius: 6, padding: "3px 6px" }}
+                        value={g.role}
+                        onChange={(e) => handleSet(g.email, e.target.value as "admin" | "editor", g.scope)}
+                      >
                         <option value="editor">Editor</option>
                         <option value="admin">Admin</option>
                       </select>
@@ -184,27 +183,30 @@ export function Access({ quarterId, me }: Props) {
                   </td>
                   <td>
                     {isAdmin && g.role === "editor" ? (
-                      <select style={{ fontSize: 12, border: "1px solid var(--line)", borderRadius: 6, padding: "3px 6px" }}
-                        value={g.scope} onChange={(e) => handleSet(g.rosId, g.role as "admin" | "editor", e.target.value)}>
+                      <select
+                        style={{ fontSize: 12, border: "1px solid var(--line)", borderRadius: 6, padding: "3px 6px" }}
+                        value={g.scope}
+                        onChange={(e) => handleSet(g.email, g.role as "admin" | "editor", e.target.value)}
+                      >
                         {TEAMS.map((t) => <option key={t}>{t}</option>)}
                       </select>
                     ) : g.scope}
                   </td>
                   {isAdmin && (
                     <td className="actcell">
-                      <button className="revoke" onClick={() => handleRevoke(g.rosId)}>Revoke</button>
+                      <button className="revoke" onClick={() => handleRevoke(g.email)}>Revoke</button>
                     </td>
                   )}
                 </tr>
               ))}
               {grants.length === 0 && (
-                <tr><td colSpan={5} style={{ padding: 24, textAlign: "center", color: "var(--muted)" }}>No additional grants — only default viewer access</td></tr>
+                <tr><td colSpan={4} style={{ padding: 24, textAlign: "center", color: "var(--muted)" }}>No elevated grants yet — all @roblox.com employees have viewer access</td></tr>
               )}
             </tbody>
           </table>
         </div>
         <div style={{ padding: "8px 18px", borderTop: "1px solid var(--line)", fontSize: 11, color: "var(--muted)" }}>
-          Everyone not listed has view-only access by default. No grant row needed.
+          All @roblox.com employees have view-only access by default. Only elevated grants are listed here.
         </div>
       </div>
 
@@ -219,8 +221,7 @@ export function Access({ quarterId, me }: Props) {
               <div key={entry.id} className="logrow">
                 <span className="who">{entry.actorName ?? entry.actorRosId}</span>
                 <span style={{ flex: 1 }}>
-                  <b>{entry.action}</b>
-                  {" "}{entry.entity}
+                  <b>{entry.action}</b>{" "}{entry.entity}
                   {entry.detail && (
                     <span style={{ color: "var(--muted)" }}>
                       {" — "}{typeof entry.detail === "string" ? entry.detail.slice(0, 100) : JSON.stringify(entry.detail).slice(0, 100)}

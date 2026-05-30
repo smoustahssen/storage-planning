@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { api, ApiError } from "../api/client.js";
+import { api } from "../api/client.js";
 import type { PlanResponse, Me, Quarter } from "../api/types.js";
 
 const POLL_INTERVAL_MS = 5000;
 
-export function usePlan(quarterId: string, asUser?: string) {
+export function usePlan(quarterId: string, userEmail: string, asUser?: string) {
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const versionRef = useRef<number>(0);
 
   const reload = useCallback(async () => {
+    if (!userEmail) return;
     try {
       const data = await api.quarters.plan(quarterId, asUser);
       setPlan(data);
@@ -18,16 +19,16 @@ export function usePlan(quarterId: string, asUser?: string) {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load plan");
     }
-  }, [quarterId, asUser]);
+  }, [quarterId, userEmail, asUser]);
 
-  // Initial load
   useEffect(() => {
+    if (!userEmail) return;
     setLoading(true);
     reload().finally(() => setLoading(false));
-  }, [reload]);
+  }, [reload, userEmail]);
 
-  // Live-update polling
   useEffect(() => {
+    if (!userEmail) return;
     const interval = setInterval(async () => {
       try {
         const { version } = await api.quarters.version(quarterId);
@@ -40,34 +41,29 @@ export function usePlan(quarterId: string, asUser?: string) {
       }
     }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [quarterId, reload]);
+  }, [quarterId, userEmail, reload]);
 
   return { plan, loading, error, reload };
 }
 
-export function useMe(asUser?: string): { me: Me | null; unauthenticated: boolean } {
+export function useMe(userEmail: string, asUser?: string): Me | null {
   const [me, setMe] = useState<Me | null>(null);
-  const [unauthenticated, setUnauthenticated] = useState(false);
 
   useEffect(() => {
-    api.access.me(asUser)
-      .then((data) => { setMe(data); setUnauthenticated(false); })
-      .catch((err) => {
-        if (err instanceof ApiError && err.status === 401) {
-          setUnauthenticated(true);
-        }
-      });
-  }, [asUser]);
+    if (!userEmail) return;
+    api.access.me(asUser).then(setMe).catch(console.error);
+  }, [userEmail, asUser]);
 
-  return { me, unauthenticated };
+  return me;
 }
 
-export function useQuarters() {
+export function useQuarters(userEmail: string) {
   const [quarters, setQuarters] = useState<Quarter[]>([]);
 
   useEffect(() => {
+    if (!userEmail) return;
     api.quarters.list().then(({ quarters }) => setQuarters(quarters)).catch(console.error);
-  }, []);
+  }, [userEmail]);
 
   return quarters;
 }

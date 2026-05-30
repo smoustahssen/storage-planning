@@ -30,6 +30,10 @@ async function request<T>(
   };
   if (asUser) headers["x-as-user"] = asUser;
 
+  // Send the user's self-identified @roblox.com email on every request
+  const userEmail = localStorage.getItem("user_email");
+  if (userEmail) headers["x-user-email"] = userEmail;
+
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers,
@@ -106,9 +110,9 @@ export const api = {
 
   access: {
     list: () => get<{ grants: AccessGrant[] }>("/access"),
-    set: (rosId: string, role: "admin" | "editor", scope: string) =>
-      put<{ ok: boolean }>(`/access/${rosId}`, { role, scope }),
-    revoke: (rosId: string) => del<{ ok: boolean }>(`/access/${rosId}`),
+    set: (email: string, role: "admin" | "editor", scope: string) =>
+      put<{ ok: boolean }>(`/access/${encodeURIComponent(email)}`, { role, scope }),
+    revoke: (email: string) => del<{ ok: boolean }>(`/access/${encodeURIComponent(email)}`),
     revokeAll: () =>
       post<{ ok: boolean }>("/access/revoke-all", {}),
     me: (asUser?: string) => get<Me>("/access/me", asUser),

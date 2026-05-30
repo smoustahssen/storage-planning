@@ -2,70 +2,67 @@ import type { FastifyInstance } from "fastify";
 import { db } from "../db/client.js";
 import { sql } from "drizzle-orm";
 import { audit, canManageAccess } from "../access/middleware.js";
-import { SARA_M_ROS_ID } from "../ros/fixture.js";
 
 export async function accessRoutes(app: FastifyInstance) {
-  // GET /api/access
-  app.get("/api/access", async (req, reply) => {
+  // GET /api/access — list all elevated grants
+  app.get("/api/access", async (_req, _reply) => {
     const grants = db.all(sql.raw(`
-      SELECT ag.ros_id, ag.role, ag.scope, p.name, p.email
-      FROM access_grant ag
-      JOIN person p ON p.ros_id = ag.ros_id
-      ORDER BY ag.role DESC, p.name
+      SELECT email, role, scope
+      FROM email_access
+      ORDER BY role DESC, email
     `));
     return { grants };
   });
 
-  // PUT /api/access/:rosId  — set or update a grant (admin only)
+  // PUT /api/access/:email — grant or update (admin only)
   app.put<{
-    Params: { rosId: string };
+    Params: { email: string };
     Body: { role: "admin" | "editor"; scope: string };
-  }>("/api/access/:rosId", async (req, reply) => {
-    const { rosId } = req.params;
+  }>("/api/access/:email", async (req, reply) => {
+    const email = decodeURIComponent(req.params.email);
     const { role, scope } = req.body;
     const user = req.user;
 
     if (!canManageAccess(user)) {
       return reply.status(403).send({ error: "Admin only" });
     }
-
-    const validRoles = ["admin", "editor"];
-    if (!validRoles.includes(role)) {
+    if (!email.endsWith("@roblox.com")) {
+      return reply.status(400).send({ error: "Must be a @roblox.com email" });
+    }
+    if (!["admin", "editor"].includes(role)) {
       return reply.status(400).send({ error: "Invalid role" });
     }
 
     db.run(sql.raw(`
-      INSERT INTO access_grant(ros_id, role, scope) VALUES ('${rosId}', '${role}', '${scope}')
-      ON CONFLICT(ros_id) DO UPDATE SET role = excluded.role, scope = excluded.scope
+      INSERT INTO email_access(email, role, scope) VALUES ('${email}', '${role}', '${scope}')
+      ON CONFLICT(email) DO UPDATE SET role = excluded.role, scope = excluded.scope
     `));
 
-    audit(user.rosId, "access.grant.set", rosId, { role, scope });
+    audit(user.rosId, "access.grant.set", email, { role, scope });
     return { ok: true };
   });
 
-  // DELETE /api/access/:rosId  — revoke to viewer (admin only)
-  app.delete<{ Params: { rosId: string } }>(
-    "/api/access/:rosId",
+  // DELETE /api/access/:email — revoke back to viewer (admin only)
+  app.delete<{ Params: { email: string } }>(
+    "/api/access/:email",
     async (req, reply) => {
-      const { rosId } = req.params;
+      const email = decodeURIComponent(req.params.email);
       const user = req.user;
 
       if (!canManageAccess(user)) {
         return reply.status(403).send({ error: "Admin only" });
       }
-
-      // Cannot revoke the admin themselves (Sara M)
-      if (rosId === SARA_M_ROS_ID) {
-        return reply.status(400).send({ error: "Cannot revoke the primary admin" });
+      if (email === user.email) {
+        return reply.status(400).send({ error: "Cannot revoke your own admin access" });
       }
 
-      db.run(sql.raw(`DELETE FROM access_grant WHERE ros_id = '${rosId}'`));
-      audit(user.rosId, "access.grant.revoke", rosId, {});
+      db.run(sql.raw(`DELETE FROM email_access WHERE email = '${email}'`));
+      audit(user.rosId, "access.grant.revoke", email, {});
       return { ok: true };
     },
   );
 
-  // POST /api/access/revoke-all  — revoke everyone except admin (admin only)
+  // POST /api/access/revoke-all — revoke all editors (admin only)
   app.post("/api/access/revoke-all", async (req, reply) => {
     const user = req.user;
 
@@ -73,16 +70,13 @@ export async function accessRoutes(app: FastifyInstance) {
       return reply.status(403).send({ error: "Admin only" });
     }
 
-    db.run(sql.raw(`
-      DELETE FROM access_grant WHERE role != 'admin'
-    `));
-
+    db.run(sql.raw(`DELETE FROM email_access WHERE role != 'admin'`));
     audit(user.rosId, "access.revoke-all", "all", {});
     return { ok: true };
   });
 
-  // GET /api/access/me  — current user's identity and role
-  app.get("/api/access/me", async (req, reply) => {
+  // GET /api/access/me — current user identity and role
+  app.get("/api/access/me", async (req, _reply) => {
     return {
       rosId: req.user.rosId,
       name: req.user.name,
@@ -92,10 +86,10 @@ export async function accessRoutes(app: FastifyInstance) {
     };
   });
 
-  // GET /api/people/search?q=  — for the access tab people picker
+  // GET /api/people/search?q= — for the access tab people picker
   app.get<{ Querystring: { q?: string } }>(
     "/api/people/search",
-    async (req, reply) => {
+    async (req, _reply) => {
       const q = (req.query.q ?? "").replace(/'/g, "''");
       const rows = db.all(sql.raw(`
         SELECT ros_id, name, email, home_team
