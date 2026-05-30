@@ -18,9 +18,9 @@ export async function ssoMiddleware(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  // Skip auth for the OAuth dance and healthcheck
+  // Only apply auth to API routes — static files and OAuth routes are public
   const { url } = request.raw;
-  if (url?.startsWith("/auth/") || url === "/healthz") return;
+  if (!url?.startsWith("/api/")) return;
 
   let rosId: string;
 
