@@ -1,0 +1,1033 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storage planner — concept mock</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+:root{
+  --ink:#1b1a17;--ink-2:#2a2825;--paper:#f4f1ea;--paper-2:#fbf9f4;--card:#fff;
+  --line:#e3ddd0;--line-strong:#d2c9b6;--muted:#7c7669;--muted-2:#9a9384;
+  --petrol:#1f6f68;--petrol-soft:#e3efed;--red:#c2342b;--red-soft:#f6e2df;
+  --amber:#b67a16;--amber-soft:#f6ecd6;--green:#2f7d4f;--green-soft:#e6f1ea;--blue:#3a6ea5;--blue-soft:#e6eef6;
+  --shadow:0 1px 2px rgba(27,26,23,.06),0 8px 24px rgba(27,26,23,.05);--radius:11px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;display:flex}
+.serif{font-family:'Instrument Serif',serif;font-weight:400}
+button{font-family:inherit}
+input,select,textarea{font-family:inherit}
+
+aside{width:204px;flex:0 0 204px;background:var(--ink);color:#d8d3c6;display:flex;flex-direction:column;padding:18px 12px;gap:3px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:9px;padding:4px 8px 16px}
+.brand .sq{width:24px;height:24px;border-radius:7px;background:var(--petrol);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Instrument Serif',serif;font-size:16px}
+.brand .nm{font-size:13.5px;font-weight:600;color:#fff;line-height:1.1}
+.brand .nm small{display:block;font-size:9.5px;font-weight:400;color:#8c8678}
+.navlbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.15em;color:#75705f;padding:13px 8px 5px}
+.nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:#cfc9bc;cursor:pointer;font-weight:500;font-size:12.5px;transition:.15s}
+.nav:hover{background:#262420;color:#fff}
+.nav.active{background:var(--petrol);color:#fff}
+.nav .ic{width:15px;text-align:center;opacity:.9}
+.nav .ct{margin-left:auto;font-size:10.5px;color:#8c8678;font-variant-numeric:tabular-nums}
+.nav.active .ct{color:#cfe8e4}
+aside .foot{margin-top:auto;font-size:10px;color:#6f6a5b;padding:8px;line-height:1.5}
+
+main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+header{display:flex;align-items:center;gap:14px;padding:13px 22px;background:var(--paper-2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+header .title h1{margin:0;font-size:19px;font-family:'Instrument Serif',serif;font-weight:400}
+header .title span{font-size:11px;color:var(--muted)}
+header .right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pick{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:4px 5px 4px 11px}
+.pick label{font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-2)}
+.pick select{border:0;background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;padding:5px 9px;border-radius:15px;cursor:pointer}
+.qstate{font-size:9.5px;padding:2px 7px;border-radius:10px;font-weight:600}
+.qstate.active{background:var(--green-soft);color:var(--green)}
+.qstate.closed{background:#ece9e1;color:var(--muted)}
+.qstate.draft{background:var(--amber-soft);color:var(--amber)}
+.roletag{font-size:9.5px;padding:3px 8px;border-radius:11px;font-weight:600}
+.roletag.Admin{background:var(--petrol-soft);color:var(--petrol)}
+.roletag.Editor{background:var(--amber-soft);color:var(--amber)}
+.roletag.Viewer{background:#ece9e1;color:var(--muted)}
+.editbtn{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border:1px solid var(--line-strong);background:#fff;color:var(--ink-2);border-radius:18px;padding:6px 13px;cursor:pointer;transition:.15s}
+.editbtn:hover{border-color:var(--petrol)}
+.editbtn.on{background:var(--petrol);color:#fff;border-color:var(--petrol)}
+.editbtn.hide{display:none}
+
+.scroll{flex:1;overflow:auto;padding:18px 22px 70px}
+.view{display:none}.view.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.robanner{display:none;background:#ece9e1;border:1px solid var(--line-strong);color:var(--ink-2);font-size:11.5px;padding:9px 14px;border-radius:9px;margin-bottom:14px}
+body[data-show-banner="true"] .robanner{display:block}
+.robanner b{font-weight:600}
+
+.capwrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow);margin-bottom:16px}
+.caprow{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.capnum{font-family:'Instrument Serif',serif;font-size:30px;line-height:1}
+.capnum small{font-size:14px;color:var(--muted)}
+.capmeta{font-size:10.5px;color:var(--muted);max-width:230px;line-height:1.45}
+.capbarwrap{flex:1;min-width:200px}
+.capbar{height:12px;border-radius:7px;background:#ece8df;overflow:hidden;position:relative}
+.capbar .fill{height:100%;background:var(--petrol);width:50%;transition:width .35s cubic-bezier(.2,.7,.2,1),background .3s}
+.capbar.over .fill{background:var(--red)}
+.capbar .cl{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);left:100%}
+.caplbls{display:flex;justify-content:space-between;font-size:10px;color:var(--muted-2);margin-top:5px}
+.overflag{font-weight:600;font-size:11px;padding:6px 11px;border-radius:8px;white-space:nowrap}
+
+.bar-actions{display:flex;align-items:center;gap:9px;margin-bottom:12px;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{font-size:11px;padding:5px 10px;border-radius:15px;border:1px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--ink-2);transition:.15s}
+.chip:hover{border-color:var(--petrol)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sp{font-size:10.5px;color:var(--muted)}
+.addbtn{font-size:11.5px;font-weight:600;color:var(--petrol);background:var(--petrol-soft);border:1px solid #cfe3df;border-radius:7px;padding:6px 11px;cursor:pointer}
+.addbtn:disabled{opacity:.35;cursor:not-allowed}
+.spacer{margin-left:auto}
+
+.listwrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.zone-h{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--paper-2);border-bottom:1px solid var(--line)}
+.zone-h .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600}
+.zone-h .hc{font-size:10.5px;color:var(--ink);background:#fff;border:1px solid var(--line);padding:2px 9px;border-radius:11px;font-variant-numeric:tabular-nums}
+.tablescroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-2);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #f0ece2;vertical-align:top;line-height:1.42}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rrow{transition:background .15s}
+.rrow:hover{background:var(--paper-2)}
+.rrow.dragok .handle{cursor:grab}
+.rrow.drag{opacity:.35}
+.handle{color:var(--muted-2);font-size:13px;user-select:none}
+body:not([data-edit="true"]) .handle{visibility:hidden}
+
+.pri{font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:5px;display:inline-block;white-space:nowrap}
+.pri.P0{background:var(--red-soft);color:var(--red)}
+.pri.P1{background:var(--amber-soft);color:var(--amber)}
+.pri.P2{background:#e7ecea;color:var(--petrol)}
+.pri.def{background:#ece9e1;color:var(--muted)}
+.team{font-size:10px;font-weight:600;color:#fff;padding:2px 7px;border-radius:5px;display:inline-block;white-space:nowrap}
+.iname{font-weight:600;font-size:12.5px;color:var(--ink)}
+.small{font-size:11px;color:var(--muted)}
+.dris{display:flex}
+.av{width:20px;height:20px;border-radius:50%;background:var(--petrol);color:#fff;font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;margin-left:-5px;flex:0 0 20px}
+.av:first-child{margin-left:0}
+.hcpill{font-size:11px;font-weight:600;background:var(--ink);color:#fff;padding:2px 8px;border-radius:11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.themetag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;display:inline-block;white-space:nowrap}
+.iconbtn{font-size:13px;line-height:1;color:var(--muted-2);background:#fff;border:1px solid var(--line);border-radius:6px;width:26px;height:26px;cursor:pointer;transition:.15s}
+.iconbtn:hover{border-color:var(--petrol);color:var(--petrol)}
+.movebtn{font-size:14px}
+.actcell{white-space:nowrap;display:flex;gap:4px}
+body:not([data-edit="true"]) .actcell{display:none}
+body:not([data-edit="true"]) .th-act{display:none}
+.readi{font-size:10px;padding:2px 8px;border-radius:10px;white-space:nowrap;display:inline-block}
+.readi.ready{background:var(--green-soft);color:var(--green)}
+.readi.scope{background:var(--amber-soft);color:var(--amber)}
+.readi.parked{background:#ece9e1;color:var(--muted)}
+.readi.watch{background:var(--blue-soft);color:var(--blue)}
+
+.redline{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.redline .bar{flex:1;height:3px;background:var(--red);border-radius:2px;position:relative}
+.redline .bar::before,.redline .bar::after{content:"";position:absolute;width:7px;height:7px;background:var(--red);border-radius:50%;top:-2px}
+.redline .bar::before{left:0}.redline .bar::after{right:0}
+.redline .tag{font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:var(--red);font-weight:700;white-space:nowrap}
+.dropzone.drop{outline:2px dashed var(--petrol);outline-offset:-4px;background:var(--petrol-soft)}
+
+/* inline editors */
+.edt{border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:11.5px;width:100%;background:#fff;color:var(--ink)}
+.edt.num{text-align:right;width:60px}
+textarea.edt{resize:vertical;min-height:46px;line-height:1.4}
+
+/* exec */
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:820px){.statgrid{grid-template-columns:repeat(2,1fr)}}
+.stat-c{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.stat-c .k{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-2);display:flex;align-items:center;gap:6px}
+.auto{font-size:8.5px;letter-spacing:.05em;background:var(--petrol-soft);color:var(--petrol);padding:1px 5px;border-radius:8px;font-weight:600}
+.stat-c .v{font-family:'Instrument Serif',serif;font-size:30px;line-height:1.1;margin-top:4px}
+.stat-c .v small{font-size:13px;color:var(--muted)}
+.stat-c .d{font-size:10px;color:var(--muted);margin-top:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.ph{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ph h3{margin:0;font-size:13.5px;font-weight:600}
+.ph .tagi{font-size:8.5px;letter-spacing:.05em;background:var(--petrol-soft);color:var(--petrol);padding:2px 6px;border-radius:8px;font-weight:600}
+.ph .tage{font-size:8.5px;letter-spacing:.05em;background:var(--amber-soft);color:var(--amber);padding:2px 6px;border-radius:8px;font-weight:600}
+.ph .meta{font-size:10.5px;color:var(--muted);margin-left:auto}
+.themebars{display:flex;flex-direction:column;gap:11px;padding:15px 18px}
+.brow{display:flex;align-items:center;gap:12px;font-size:12px}
+.brow .nm{width:140px;flex:0 0 140px;font-weight:500}
+.brow .tr{flex:1;height:11px;border-radius:6px;background:#ece8df;overflow:hidden;min-width:80px}
+.brow .tr i{display:block;height:100%;border-radius:6px;transition:width .4s}
+.brow .vv{width:104px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.brow .vv b{color:var(--ink)}
+.minibar{height:7px;border-radius:4px;background:#ece8df;width:90px;display:inline-block;overflow:hidden;vertical-align:middle}
+.minibar i{display:block;height:100%;background:var(--petrol)}
+.minibar i.over{background:var(--red)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.dot.bal{background:var(--green)}.dot.over{background:var(--red)}.dot.under{background:var(--amber)}.dot.bor{background:var(--petrol)}
+.gap.neg{color:var(--amber)}.gap.pos{color:var(--red)}.gap.zero{color:var(--green)}
+.gapcell{font-weight:600;font-variant-numeric:tabular-nums}
+.gapcell.hl{background:var(--amber-soft)}
+.commit-list{font-size:11px;color:var(--muted-2);line-height:1.5}
+.commit-list b{color:var(--ink-2);font-weight:500}
+.focusmini{font-size:10.5px;line-height:1.55}
+.focusmini span{white-space:nowrap}
+.prio{padding:6px 18px 14px}
+.prio .pl{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f0ece2;font-size:12px;align-items:flex-start}
+.prio .pl:last-child{border-bottom:0}
+.prio .pl .n{font-family:'Instrument Serif',serif;font-size:20px;color:var(--petrol);width:24px;flex:0 0 24px;line-height:1.1}
+.prio .pl .body{flex:1}
+.prio .pl b{font-weight:600}
+.prio .pl .rm{visibility:hidden}
+body[data-edit="true"] .prio .pl .rm{visibility:visible}
+
+.note{font-size:11px;color:var(--muted);background:var(--petrol-soft);border:1px solid #cfe3df;border-radius:9px;padding:10px 14px;margin-bottom:14px;line-height:1.5}
+.note b{color:var(--petrol)}
+.netpos{font-weight:600;font-variant-numeric:tabular-nums}
+.netpos.plus{color:var(--green)}.netpos.minus{color:var(--red)}.netpos.zero{color:var(--muted)}
+.flowarrow{color:var(--muted-2);margin:0 5px}
+
+.defs{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:14px}
+@media(max-width:720px){.defs{grid-template-columns:1fr}}
+.def{display:flex;gap:9px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:11px;align-items:flex-start}
+.def b{font-weight:600;display:block;font-size:11.5px;margin-bottom:1px}
+.def span{color:var(--muted);line-height:1.4}
+
+.promote{font-size:10.5px;font-weight:600;color:var(--petrol);background:var(--petrol-soft);border:0;border-radius:6px;padding:5px 9px;cursor:pointer;white-space:nowrap}
+.promote:disabled{opacity:.4;cursor:not-allowed}
+
+.matrix th:not(:first-child),.matrix td:not(:first-child){text-align:center}
+.perm{font-size:14px}.perm.edit{color:var(--petrol)}.perm.view{color:var(--amber)}.perm.no{color:#d8d3c6}
+.logrow{display:flex;gap:12px;padding:10px 16px;border-bottom:1px solid #f0ece2;font-size:11.5px;align-items:flex-start}
+.logrow:last-child{border-bottom:0}
+.logrow .who{width:90px;flex:0 0 90px;font-weight:600}
+.logrow .when{margin-left:auto;color:var(--muted-2);font-size:10px;white-space:nowrap}
+.logrow b{font-weight:600}
+.revoke{font-size:10.5px;color:var(--red);background:var(--red-soft);border:0;border-radius:6px;padding:5px 9px;cursor:pointer}
+.warnbtn{font-size:11px;color:var(--red);background:#fff;border:1px solid var(--red);border-radius:7px;padding:6px 11px;cursor:pointer}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(27,26,23,.32);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:430px;max-width:92vw;background:var(--paper-2);border-left:1px solid var(--line);box-shadow:-12px 0 40px rgba(27,26,23,.14);transform:translateX(100%);transition:transform .24s cubic-bezier(.2,.7,.2,1);z-index:41;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dh{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dh h3{margin:0;font-family:'Instrument Serif',serif;font-size:19px;font-weight:400}
+.dh .x{margin-left:auto;font-size:18px;color:var(--muted);background:none;border:0;cursor:pointer}
+.db{padding:16px 20px;overflow:auto;flex:1}
+.fl{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-2);margin:14px 0 5px}
+.fl:first-child{margin-top:0}
+.fin{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;background:#fff;color:var(--ink)}
+.frow{display:flex;gap:10px}
+.frow>div{flex:1}
+.asg{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-bottom:7px}
+.asg .nm{font-size:12px;font-weight:500;flex:1}
+.asg .ht{font-size:10px;color:#fff;padding:1px 6px;border-radius:5px}
+.asg input{width:54px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:12px;text-align:right}
+.asg .rm{font-size:13px;color:var(--red);background:none;border:0;cursor:pointer}
+.asgsum{font-size:11px;color:var(--muted);margin-top:2px;text-align:right}
+.df{display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--line)}
+.df .save{flex:1;background:var(--petrol);color:#fff;border:0;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer}
+.df .del{background:#fff;color:var(--red);border:1px solid var(--red);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.addasg{display:flex;gap:8px;margin-top:8px}
+.addasg select{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px;font-size:12px;background:#fff}
+.addasg input{width:60px;border:1px solid var(--line);border-radius:8px;padding:7px;font-size:12px;text-align:right}
+.addasg button{background:var(--ink);color:#fff;border:0;border-radius:8px;padding:0 12px;cursor:pointer}
+
+/* donut */
+.donutwrap{display:flex;align-items:center;gap:26px;padding:18px;flex-wrap:wrap}
+.donut{width:148px;height:148px;border-radius:50%;flex:0 0 148px;position:relative}
+.donut::after{content:"";position:absolute;inset:30px;background:var(--card);border-radius:50%}
+.donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.donut .ctr b{font-family:'Instrument Serif',serif;font-size:26px;line-height:1}
+.donut .ctr span{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.legend{flex:1;min-width:200px;display:flex;flex-direction:column;gap:7px}
+.lgrow{display:flex;align-items:center;gap:9px;font-size:12px}
+.lgrow .sw{width:11px;height:11px;border-radius:3px;flex:0 0 11px}
+.lgrow .nm{font-weight:500}
+.lgrow .vv{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--muted)}
+.lgrow .vv b{color:var(--ink)}
+
+/* qoq */
+.qoq{padding:6px 18px 16px}
+.qoqrow{display:flex;align-items:center;gap:12px;font-size:12px;padding:8px 0;border-bottom:1px solid #f0ece2}
+.qoqrow:last-child{border-bottom:0}
+.qoqrow .nm{width:140px;flex:0 0 140px;font-weight:500}
+.qoqrow .nm .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:7px;vertical-align:middle}
+.qoqrow .pr{width:78px;text-align:right;color:var(--muted-2);font-variant-numeric:tabular-nums}
+.qoqrow .ar{flex:1;text-align:center;color:var(--muted-2)}
+.qoqrow .cu{width:78px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.qoqrow .dl{width:104px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.qoqrow .dl.up{color:var(--green)}.qoqrow .dl.down{color:var(--red)}.qoqrow .dl.flat{color:var(--muted-2)}
+.qoqhead{display:flex;gap:12px;font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted-2);padding:0 0 4px}
+.qoqhead .nm{width:140px;flex:0 0 140px}.qoqhead .pr{width:78px;text-align:right}.qoqhead .ar{flex:1}.qoqhead .cu{width:78px;text-align:right}.qoqhead .dl{width:104px;text-align:right}
+
+/* lend form + per-eng chips */
+.lendbar{display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;margin-bottom:14px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.lendbar .lb{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-2);font-weight:600;margin-right:2px}
+.lendbar select,.lendbar input{border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:12px;background:#fff;color:var(--ink)}
+.lendbar input{width:64px;text-align:right}
+.lendbar button{background:var(--petrol);color:#fff;border:0;border-radius:7px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer}
+.lendbar button:disabled{opacity:.4;cursor:not-allowed}
+.lendbar .flowarrow{color:var(--muted-2)}
+.pchip{display:inline-flex;align-items:center;gap:5px;background:var(--paper-2);border:1px solid var(--line);border-radius:7px;padding:2px 6px;margin:2px 3px 2px 0;font-size:11px;white-space:nowrap}
+.pchip.cross{border-color:#bcd9d4;background:var(--petrol-soft)}
+.pchip input{width:42px;border:1px solid var(--line);border-radius:5px;padding:1px 4px;font-size:11px;text-align:right}
+.pchip .rm{color:var(--red);background:none;border:0;cursor:pointer;font-size:12px;line-height:1;padding:0}
+.engadd{display:inline-flex;gap:5px;margin-top:5px;align-items:center}
+.engadd select{border:1px solid var(--line);border-radius:6px;padding:3px 5px;font-size:11px;background:#fff;max-width:170px}
+.engadd input{width:48px;border:1px solid var(--line);border-radius:6px;padding:3px 5px;font-size:11px;text-align:right}
+.engadd button{background:var(--ink);color:#fff;border:0;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer}
+</style>
+
+<aside>
+  <div class="brand"><div class="sq">S</div><div class="nm">Storage planner<small>portfolio roadmap</small></div></div>
+  <div class="navlbl">Report</div>
+  <div class="nav" data-v="exec"><span class="ic">◳</span>Executive dashboard</div>
+  <div class="navlbl">Plan &amp; build</div>
+  <div class="nav active" data-v="roadmap"><span class="ic">▤</span>Roadmap <span class="ct" id="nv-road"></span></div>
+  <div class="nav" data-v="capacity"><span class="ic">◫</span>Capacity &amp; staffing</div>
+  <div class="nav" data-v="lending"><span class="ic">⇄</span>Lending flows</div>
+  <div class="nav" data-v="backlog"><span class="ic">☰</span>Backlog <span class="ct" id="nv-back"></span></div>
+  <div class="navlbl">Govern</div>
+  <div class="nav" data-v="access"><span class="ic">⚿</span>Access &amp; audit</div>
+  <div class="foot">10 services · 8 delivery teams<br>HC = sum of assignments</div>
+</aside>
+
+<main>
+  <header>
+    <div class="title"><h1 id="vtitle">Roadmap</h1><span id="vsub">Drag an initiative across the line to commit or defer it. Capacity recomputes live.</span></div>
+    <div class="right">
+      <button class="editbtn" id="editToggle"><span>✎</span> Edit</button>
+      <div class="pick"><label>Quarter</label>
+        <select id="qtr"><option value="q2">Q2 2026</option><option value="q3" selected>Q3 2026</option><option value="q4">Q4 2026</option></select>
+        <span class="qstate active" id="qstate">Current</span></div>
+      <div class="pick"><label>As</label><select id="who"></select><span class="roletag Admin" id="roletag">Admin</span></div>
+    </div>
+  </header>
+
+  <div class="scroll">
+    <div class="robanner" id="robanner"></div>
+
+    <!-- EXEC -->
+    <section class="view" id="v-exec">
+      <div class="statgrid">
+        <div class="stat-c"><div class="k">Allocated HC <span class="auto">auto</span></div><div class="v"><span id="ex-hc">0</span><small>/43</small></div><div class="d" id="ex-hc-d"></div></div>
+        <div class="stat-c"><div class="k">Committed initiatives <span class="auto">auto</span></div><div class="v" id="ex-init">0</div><div class="d" id="ex-init-d"></div></div>
+        <div class="stat-c"><div class="k">Unallocated HC <span class="auto">auto</span></div><div class="v" id="ex-free">0</div><div class="d">capacity not yet assigned</div></div>
+        <div class="stat-c"><div class="k">Deferred / unfunded <span class="auto">auto</span></div><div class="v" id="ex-def">0</div><div class="d">below the line · Ready in backlog</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h3>Allocation by theme</h3><span class="tagi">auto</span><span class="meta">Sum of assignment HC grouped by each initiative's theme</span></div>
+        <div class="donutwrap"><div class="donut" id="donut"><div class="ctr"><b id="donutTot">0</b><span>HC</span></div></div><div class="legend" id="donutLegend"></div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h3>Quarter over quarter</h3><span class="tagi">auto</span><span class="meta" id="qoqMeta">Theme HC shift vs the previous quarter</span></div>
+        <div class="qoq" id="qoqBody"></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h3>Top priorities</h3><span class="tage">editable</span><span class="meta">Narrative you set for the quarter</span></div>
+        <div class="prio" id="prioList"></div>
+        <div style="padding:0 18px 14px"><button class="addbtn" id="addPrio">+ Add priority</button></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h3>Initiatives by team</h3><span class="tagi">auto</span><span class="meta">Home, effective, allocated, gap, commitments and focus-area split with HC</span></div>
+        <div class="tablescroll"><table id="execTeam"><thead><tr>
+          <th>Team</th><th class="num">Home HC</th><th class="num">Effective HC</th><th class="num">Allocated HC</th><th class="num">Gap</th><th>Commitments (P0·P1)</th><th>Allocation by focus area</th>
+        </tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="view active" id="v-roadmap">
+      <div class="capwrap"><div class="caprow">
+        <div><div class="capnum"><span id="capUsed">0</span><small> / 43 HC</small></div>
+        <div class="capmeta">Allocated HC vs org capacity. Allocated is the sum of every IC assignment, so it always matches the other tabs.</div></div>
+        <div class="capbarwrap"><div class="capbar" id="capbar"><div class="fill" id="capfill"></div><div class="cl"></div></div>
+        <div class="caplbls"><span>0</span><span>capacity line · 43 HC</span></div></div>
+        <div class="overflag" id="overflag"></div>
+      </div></div>
+      <div class="bar-actions">
+        <div class="chips" id="chipsRoad"><div class="chip on" data-t="all">All teams</div></div>
+        <span class="sp" id="roadCount"></span>
+        <span class="spacer"></span>
+        <button class="addbtn" id="addInit" disabled>+ Add initiative</button>
+      </div>
+      <div class="listwrap">
+        <div class="zone-h"><span class="lbl">Committed · above the line</span><span class="hc" id="committedHC">0 HC</span></div>
+        <div class="dropzone tablescroll" id="zoneAbove">
+          <table style="min-width:920px"><thead><tr>
+            <th style="width:24px"></th><th>Pri</th><th>Team</th><th style="min-width:170px">Initiative</th>
+            <th style="min-width:110px">Theme</th><th style="min-width:200px">Deliverables</th><th style="min-width:160px">Metrics &amp; targets</th>
+            <th class="num">HC</th><th>DRIs</th><th class="th-act">Edit</th>
+          </tr></thead><tbody id="tbAbove"></tbody></table>
+        </div>
+        <div class="redline"><span class="tag">Deprioritized</span><div class="bar"></div><span class="tag">Deferred · Ready in backlog</span></div>
+        <div class="dropzone tablescroll" id="zoneBelow">
+          <table style="min-width:820px"><thead><tr>
+            <th style="width:24px"></th><th>Pri</th><th>Team</th><th style="min-width:170px">Initiative</th>
+            <th style="min-width:110px">Theme</th><th style="min-width:240px">Why not funded this quarter</th><th>Readiness</th><th class="th-act">Edit</th>
+          </tr></thead><tbody id="tbBelow"></tbody></table>
+        </div>
+      </div>
+      <div class="sp" style="margin-top:9px">Below the line shows the backlog items marked Ready. Move one up to commit it, defer a committed item and it drops back into the Ready backlog. The two stay in sync.</div>
+    </section>
+
+    <!-- CAPACITY -->
+    <section class="view" id="v-capacity">
+      <div class="note"><b>This is where the roadmap gets built.</b> Assign engineers to initiatives at any percentage of their time, add or remove a person's projects right here, and every percentage rolls up into the initiative HC, the team totals and the org number. Over and under allocation flag automatically.</div>
+      <div class="bar-actions"><button class="addbtn" id="addAsg" disabled>+ Assign an engineer</button><span class="spacer"></span><span class="sp" id="capCount"></span></div>
+      <div class="panel"><div class="ph"><h3>Team capacity</h3><span class="tagi">auto</span><span class="meta">Home vs effective HC after loans · allocated from assignments</span></div>
+        <div class="tablescroll"><table id="capTeam"><thead><tr><th>Team</th><th>Lead</th><th class="num">Home</th><th class="num">Effective</th><th class="num">Allocated</th><th class="num">Net loans</th><th>Load</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="panel"><div class="ph"><h3>Engineer assignments</h3><span class="tagi">auto rollup</span><span class="tage">editable</span><span class="meta">One row per person · add or delete projects · ✓ balanced = available time</span></div>
+        <div class="tablescroll"><table id="icTable"><thead><tr><th>Engineer</th><th>Home</th><th style="min-width:320px">Assigned to (project · %)</th><th class="num">Total</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- LENDING -->
+    <section class="view" id="v-lending">
+      <div class="note"><b>Derived, never hand-kept.</b> A loan is just a cross-team assignment. Lend someone below, or edit a percentage, and the lending team's effective HC and the borrowing team's allocation both move. This is the screen to point at when a team asks why it is down headcount.</div>
+      <div class="lendbar">
+        <span class="lb">Lend</span>
+        <select id="lendEng"></select>
+        <span class="flowarrow">→</span>
+        <select id="lendProj"></select>
+        <input id="lendPct" type="number" step="0.1" min="0" max="1" placeholder="0.5">
+        <button id="lendAdd" disabled>Add loan</button>
+        <span class="sp" id="lendHint"></span>
+      </div>
+      <div class="panel"><div class="ph"><h3>Net position by team</h3><span class="tagi">auto</span><span class="meta">Effective minus home</span></div>
+        <div class="tablescroll"><table id="netTable"><thead><tr><th>Team</th><th class="num">Home</th><th class="num">Lent out</th><th class="num">Borrowed in</th><th class="num">Net</th><th class="num">Effective</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="panel"><div class="ph"><h3>Active loans</h3><span class="tage">editable</span><span class="meta">Cross-team assignments this quarter</span></div>
+        <div class="tablescroll"><table id="loanTable"><thead><tr><th>Engineer</th><th style="min-width:170px">Flow</th><th style="min-width:160px">Project</th><th class="num">HC</th><th class="th-act">Edit</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- BACKLOG -->
+    <section class="view" id="v-backlog">
+      <div class="defs">
+        <div class="def"><span>🟢</span><div><b>Ready</b><span>What, why and how are known. Just needs capacity. These are the items below the line on the roadmap.</span></div></div>
+        <div class="def"><span>🟡</span><div><b>Needs scoping</b><span>Valid need, missing details before it can be sized.</span></div></div>
+        <div class="def"><span>🟠</span><div><b>Parked</b><span>Deliberately not now. Revisit at a named time.</span></div></div>
+        <div class="def"><span>🔵</span><div><b>Watching</b><span>Not sure if we should do it at all yet.</span></div></div>
+      </div>
+      <div class="bar-actions"><div class="chips" id="chipsBack"><div class="chip on" data-t="all">All teams</div></div><span class="spacer"></span><button class="addbtn" id="addBack" disabled>+ Add backlog item</button></div>
+      <div class="listwrap tablescroll"><table id="backTable" style="min-width:1040px"><thead><tr>
+        <th>Readiness</th><th>Team</th><th style="min-width:150px">Initiative</th><th style="min-width:220px">Problem / value</th>
+        <th style="min-width:160px">Success metric</th><th>Effort</th><th>Earliest</th><th>Requestor / DRI</th><th>Next action</th><th class="th-act">Edit</th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <!-- ACCESS -->
+    <section class="view" id="v-access">
+      <div class="note"><b>View is the default for everyone.</b> Sara is admin. Grant edit to a person, scope it to a single team or the whole portfolio, and revoke any time. The header "As" selector reads from this table, so you can preview exactly what each person can do.</div>
+      <div class="bar-actions"><button class="addbtn" id="addPerson" disabled>+ Add person</button><span class="spacer"></span><button class="warnbtn" id="revokeAll">Revoke all to view-only</button></div>
+      <div class="panel"><div class="ph"><h3>People &amp; access</h3><span class="tage">editable by admin</span></div>
+        <div class="tablescroll"><table id="peopleTable"><thead><tr><th>Person</th><th>Role</th><th>Scope</th><th class="th-act">Manage</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="panel"><div class="ph"><h3>What each role can do</h3><span class="meta">⬤ edit · ◐ view only · ○ hidden</span></div>
+        <div class="tablescroll"><table class="matrix"><thead><tr><th>Role</th><th>Priority line</th><th>Initiatives &amp; HC</th><th>Themes</th><th>Backlog</th><th>Lending</th><th>Exec view</th><th>Access</th></tr></thead><tbody>
+          <tr><td><b>Admin</b></td><td><span class="perm edit">⬤</span></td><td><span class="perm edit">⬤</span></td><td><span class="perm edit">⬤</span></td><td><span class="perm edit">⬤</span></td><td><span class="perm edit">⬤</span></td><td><span class="perm edit">⬤</span></td><td><span class="perm edit">⬤</span></td></tr>
+          <tr><td>Editor (scoped)</td><td><span class="perm view">◐</span></td><td><span class="perm edit">⬤</span></td><td><span class="perm view">◐</span></td><td><span class="perm edit">⬤</span></td><td><span class="perm edit">⬤</span></td><td><span class="perm view">◐</span></td><td><span class="perm no">○</span></td></tr>
+          <tr><td>Viewer (default)</td><td><span class="perm view">◐</span></td><td><span class="perm view">◐</span></td><td><span class="perm view">◐</span></td><td><span class="perm view">◐</span></td><td><span class="perm view">◐</span></td><td><span class="perm view">◐</span></td><td><span class="perm no">○</span></td></tr>
+        </tbody></table></div>
+      </div>
+      <div class="panel"><div class="ph"><h3>Change log</h3><span class="meta">Every edit, attributed and timestamped</span></div><div id="logList"></div></div>
+    </section>
+  </div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer"><div class="dh"><h3 id="dTitle">Edit initiative</h3><button class="x" id="dClose">✕</button></div>
+  <div class="db" id="dBody"></div>
+  <div class="df"><button class="del" id="dDel">Delete</button><button class="save" id="dSave">Save</button></div>
+</div>
+
+<script>
+const teamColor={'RDB-KV':'#1f6f68','RDB-PG':'#3a6ea5','EaaS':'#9a5b2e','RaaS':'#6b6f1f','QaaS':'#8a3d6b','R3':'#2e6b6b','SIM':'#7a4a8a','MS SQL':'#a8552f','All':'#5a5648'};
+const themeColor={'KTLO':'#5a5648','Reliability':'#1f6f68','Security':'#c2342b','Cust Exp':'#9a5b2e','Efficiency':'#6b6f1f'};
+const THEMES=['KTLO','Reliability','Security','Cust Exp','Efficiency'];
+const TEAMLIST=['RDB-KV','RDB-PG','EaaS','RaaS','QaaS','R3','SIM','MS SQL'];
+const PRIS=['P0','P1','P2'];
+const HOME={'RDB-KV':6,'RDB-PG':3,'EaaS':7,'RaaS':4,'QaaS':3,'R3':6,'SIM':9,'MS SQL':5};
+const CAP=43;
+const leadOf={'RDB-KV':'Dikang Gu','RDB-PG':'Yingjie He','EaaS':'Kai Liu','RaaS':'Sen Li','QaaS':'Jeffrey Zhong','R3':'Jeffrey Zhong','SIM':'Ferris Li','MS SQL':'Gopal Anand'};
+const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2);
+let pid=300;const nid=()=>'p'+(pid++);
+
+/* ===== committed projects (above the line) per quarter ===== */
+const PROJ={
+ q2:[
+  {id:'ktlo',pri:'P0',team:'All',name:'KTLO: 24×7 operations — all services',theme:'KTLO',del:'Continuous 24×7 ops across 8 services. Oncall, patching 95% ≤30d, incident response, SOX/SOC2.',met:'MTTR ≤6h; toil growth <15%; SOX complete'},
+  {id:'creator',pri:'P0',team:'RDB-KV',name:'Creator DataStore + Frost P13N',theme:'Cust Exp',del:'RDB prod reads for 26 universes, auto-fallback DDB/S3. Frost 50%→100% on RDB.',met:'100% consistency vs DDB/S3; p99 ≤ baseline; PRR approved'},
+  {id:'cell',pri:'P0',team:'RDB-KV',name:'Cell stability / HA + Raft foundation',theme:'Reliability',del:'Continuous patching, single-cell HA validated [exit gate]. Raft consensus + leader failover.',met:'Patching <0.1% error; HA drill passing; 0 P0 correctness'},
+  {id:'flow',pri:'P0',team:'EaaS',name:'Flow control (phase 2)',theme:'Reliability',del:'EaaS API enforces ACC server-side. End-to-end backpressure chain. CRDB recovery 10→5 min.',met:'CRDB recovery ≤10 min; throttle at ~5% error'},
+  {id:'staging',pri:'P0',team:'EaaS',name:'Staging & safe release',theme:'Reliability',del:'Storage staging env. Canary + progressive rollout. Data-correctness E2E framework.',met:'3 non-DC SEVs captured; 5 economy test cases'},
+  {id:'cacherust',pri:'P0',team:'EaaS',name:'Cache Rust client enhancement',theme:'Reliability',del:'Metrics coverage, circuit breaker, jitter on reconnect. Onboard to Secret Broker.',met:'P0 feature parity in Rust client'},
+  {id:'secrets',pri:'P0',team:'All',name:'Secrets mgmt: 100% via Secret Broker',theme:'Security',del:'All services onboard to Secret Broker. 100% rotating. No long-lived manual secrets. TLS live.',met:'100% rotated via broker; 0 manual secrets; TLS live'},
+  {id:'ssh',pri:'P0',team:'All',name:'SSH lockdown + pod access audit',theme:'Security',del:'CRDB Economy 100% via SAPI. R3 fleet 100% locked. MS SQL break-glass. Pod scope-down.',met:'100% lockdown; InfraSec sign-off'},
+  {id:'raasstd',pri:'P0',team:'RaaS',name:'Client standardization + MDS API + EV1',theme:'Reliability',del:'Golang active-passive + Vault. 100% deploys via MDS (Luobu unblock). 25% EV1 off local cache.',met:'Luobu unblocked; 6k-node limit bypassed; 25% EV1 migrated'},
+  {id:'crdbrel',pri:'P0',team:'SIM',name:'CRDB reliability: slow query + ZBL',theme:'Reliability',del:'E2E slow-query solution across EaaS/CRDB with CockroachLabs. ZBL support.',met:'80% out-of-SLO queries covered by EOQ'},
+  {id:'pgint',pri:'P0',team:'RDB-PG',name:'EaaS on RDB-PG integration',theme:'Cust Exp',del:'EaaS core data path (APIs, pooling, static schemas) on PG.',met:'Shadow 1 EaaS use case E2E on PG, single region'},
+  {id:'vsearch',pri:'P1',team:'RDB-PG',name:'Vector search on RDB',theme:'Cust Exp',del:'POC validated by MLP. Dedicated RDB cluster w/ HA + backup in CHI.',met:'POC live; dedicated cluster HA + backup'},
+  {id:'qaascreator',pri:'P1',team:'QaaS',name:'Onboard Creator + Safety from SQS',theme:'Cust Exp',del:'Managed QaaS Kafka Connect. Zero-loss message delivery.',met:'Zero-loss delivery validated; both live on QaaS'},
+  {id:'r3dr',pri:'P1',team:'R3',name:'Disaster recovery: cross-region',theme:'Reliability',del:'Cross-region replication CHI↔ASH, RPO ≤30s for 100% DMR.',met:'Replication live; RPO ≤30s; DR drill passed'},
+  {id:'r3ec',pri:'P1',team:'R3',name:'Erasure coding EC(6,4)',theme:'Reliability',del:'Adopt EC(6,4) across R3 fleet for 11-nines durability during patching.',met:'11-nines durability from 9-nines'},
+ ],
+ q3:[
+  {id:'k3ktlo',pri:'P0',team:'All',name:'KTLO: 24×7 operations — all services',theme:'KTLO',del:'Continuous 24×7 ops across 8 services. Oncall, patching 95% ≤30d, SOX/SOC2.',met:'MTTR ≤6h; toil growth <15%'},
+  {id:'k3cell',pri:'P0',team:'RDB-KV',name:'Cell stability GA + multi-cell',theme:'Reliability',del:'Single-cell HA GA. Begin multi-cell on RKS. Raft leader failover hardened.',met:'Multi-cell drill passing; 0 P0 correctness'},
+  {id:'k3creator',pri:'P0',team:'RDB-KV',name:'Creator DataStore GA (source of truth)',theme:'Cust Exp',del:'26 universes on RDB as source of truth. DDB decommission prep. Frost 100%.',met:'SoT live; 6-month SoT clock started'},
+  {id:'k3cdc',pri:'P0',team:'RDB-KV',name:'CDC engine + tenant move pipeline',theme:'Reliability',del:'Ordered change stream, enables PITR + tenant moves and OrderedDataStore.',met:'CDC prototype live; ordered stream + replay + checkpoint'},
+  {id:'k3flow',pri:'P0',team:'EaaS',name:'Flow control (phase 3) + SLO enforcement',theme:'Reliability',del:'Server-side ACC everywhere. SLO enforcement and capacity signals shipped.',met:'CRDB recovery ≤5 min; SLO enforcement live'},
+  {id:'k3staging',pri:'P0',team:'EaaS',name:'Safe release hardening',theme:'Reliability',del:'Canary + progressive rollout default. Config-as-Code across services.',met:'90% releases via canary; 0 config-drift SEVs'},
+  {id:'k3secrets',pri:'P0',team:'All',name:'Secrets enforcement active',theme:'Security',del:'100% MDS-managed services on SB-managed Vault paths, enforcement active.',met:'Enforcement on; 0 manual secrets; TLS everywhere'},
+  {id:'k3ssh',pri:'P0',team:'All',name:'SSH lockdown completion + Grimlock',theme:'Security',del:'Remaining fleet lockdown. Grimlock POC for pod identity.',met:'100% lockdown; Grimlock POC reviewed'},
+  {id:'k3crdb',pri:'P0',team:'SIM',name:'CRDB reliability + slow-query GA',theme:'Reliability',del:'E2E slow-query GA with CockroachLabs. ZBL hardening.',met:'90% out-of-SLO queries covered'},
+  {id:'k3pg',pri:'P1',team:'RDB-PG',name:'EaaS-to-PG integration tooling',theme:'Cust Exp',del:'Data-path tooling on PG. Gated on +3 PG kernel eng decision.',met:'3-5 use cases migrated, single region'},
+  {id:'k3qaas',pri:'P1',team:'QaaS',name:'Central Kafka proxy (Phase 1)',theme:'Reliability',del:'Unified API + quota enforcement. Scale path to 40T msg/day.',met:'Proxy live; quota on 100% ingestion'},
+  {id:'k3raas',pri:'P1',team:'RaaS',name:'EV1 migration (50%) + MDS',theme:'Reliability',del:'50% EV1 off local cache. Continue MDS deploy standardization.',met:'50% EV1 migrated; deploys via MDS'},
+ ],
+ q4:[
+  {id:'k4ktlo',pri:'P0',team:'All',name:'KTLO: 24×7 operations — all services',theme:'KTLO',del:'Draft. Carry-forward steady-state ops.',met:'MTTR ≤6h; toil growth <15%'},
+  {id:'k4multicell',pri:'P0',team:'RDB-KV',name:'Multi-cell production rollout',theme:'Reliability',del:'Draft. Multi-cell to production traffic on RKS.',met:'Multi-cell at 20% production'},
+  {id:'k4ddb',pri:'P1',team:'RDB-KV',name:'DDB decommission (post-SoT)',theme:'Efficiency',del:'Draft. Begin DDB decommission after 6-month SoT period.',met:'Dual-write off for migrated universes'},
+ ]
+};
+
+/* ===== backlog per quarter (Ready items also appear below the line) ===== */
+const BACK={
+ q2:[
+  {id:'b-ads',readi:'ready',rl:'Ready',team:'RDB-KV',name:'Ads/Discovery: insertion cache',theme:'Cust Exp',pv:'Ads hitting Redis ~4.8TB. Discovery needs 1.2TB. Redis cannot scale cost-effectively.',sm:'Shadow traffic; p99 ≤ Redis baseline.',ef:'L',st:'Q3 2026',dri:'Vincent Jiang',na:'Pick P0 use-case'},
+  {id:'b-milvus',readi:'ready',rl:'Ready',team:'RDB-PG',name:'VectorDB (Milvus) full ownership',theme:'Cust Exp',pv:'20+ AI use-cases blocked. ETCD/Kafka reliability issues. No clear owner.',sm:'Single owner; reliability SLO set.',ef:'M',st:'Q3 2026',dri:'Yingjie He',na:'Confirm ownership'},
+  {id:'b-ceph',readi:'ready',rl:'Ready',team:'R3',name:'Ceph software release v19.2.3',theme:'Reliability',pv:'No HC after Weiji/Leo loaned out. EOL Aug 2026.',sm:'Fleet on v19.2.3 before EOL.',ef:'M',st:'Q3 2026',dri:'Leon Gao',na:'Reclaim 0.8 HC'},
+  {id:'b-cost',readi:'scope',rl:'Needs scoping',team:'All',name:'Cost attribution: ACTS + per-team',theme:'Efficiency',pv:'No HC to instrument ACTS-based attribution. High FinOps demand.',sm:'Per-team reports in Mosaic; ACTS >95% accurate.',ef:'M',st:'Q3 2026',dri:'Leadership',na:'Confirm platform'},
+  {id:'b-sdk',readi:'parked',rl:'Parked',team:'EaaS',name:'SDK & CX: transactions + fixes',theme:'Cust Exp',pv:'SDK wraps gRPC errors. int32/64 casting issues. Zero Q2 capacity.',sm:'Transaction MVP; SDK pain points fixed.',ef:'XL',st:'Q4 2026',dri:'EaaS Eng',na:'Revisit post-P0'},
+  {id:'b-kvrocks',readi:'watch',rl:'Watching',team:'RaaS',name:'Ephemeral store (KVRocks)',theme:'Cust Exp',pv:'SSD-based caching for latency-insensitive RaaS use cases.',sm:'Use cases moved to KVRocks.',ef:'TBD',st:'TBD',dri:'Sen Li',na:'Scoping'},
+ ],
+ q3:[
+  {id:'c-ads',readi:'ready',rl:'Ready',team:'RDB-KV',name:'Ads/Discovery: insertion cache',theme:'Cust Exp',pv:'Ads hitting Redis ~4.8TB. Discovery needs 1.2TB. Redis cannot scale cost-effectively.',sm:'Shadow traffic; p99 ≤ Redis baseline.',ef:'L',st:'Q4 2026',dri:'Vincent Jiang',na:'Pick P0 use-case'},
+  {id:'c-milvus',readi:'ready',rl:'Ready',team:'RDB-PG',name:'VectorDB (Milvus) full ownership',theme:'Cust Exp',pv:'20+ AI use-cases blocked. ETCD/Kafka reliability issues.',sm:'Single owner; reliability SLO set.',ef:'M',st:'Q4 2026',dri:'Yingjie He',na:'Confirm ownership'},
+  {id:'c-bloom',readi:'ready',rl:'Ready',team:'EaaS',name:'Bloom filters in EaaS',theme:'Cust Exp',pv:'40M+ evals/sec across Safety, Economy, Ads. Current owner unresourced.',sm:'YAML-configured; 15+ use cases migrated.',ef:'L',st:'Q4 2026',dri:'Eitan Rothberg',na:'Reclaim HC'},
+  {id:'c-cost',readi:'scope',rl:'Needs scoping',team:'All',name:'Cost attribution: ACTS + per-team',theme:'Efficiency',pv:'No storage cost visibility per team. High FinOps demand.',sm:'Per-team reports in Mosaic; ACTS >95% accurate.',ef:'M',st:'Q4 2026',dri:'Leadership',na:'Confirm platform'},
+  {id:'c-ods',readi:'scope',rl:'Needs scoping',team:'RDB-KV',name:'OrderedDataStore on RDB',theme:'Cust Exp',pv:'Requires CDC engine, Materializer, list-keys + ODS indexes.',sm:'100% OrderedDataStore on RDB.',ef:'XL',st:'H1 2027',dri:'RDB-KV Eng',na:'Gate on CDC'},
+  {id:'c-starrocks',readi:'parked',rl:'Parked',team:'SIM',name:'StarRocks + R3 logging analytics POC',theme:'Efficiency',pv:'Workload consolidation deferred. Need cost analysis vs ClickHouse.',sm:'≥40% cost saving vs ClickHouse Cloud.',ef:'XL',st:'Q4 2026',dri:'Danny Yuan',na:'Run analysis'},
+  {id:'c-sdk',readi:'parked',rl:'Parked',team:'EaaS',name:'SDK & CX: transactions + fixes',theme:'Cust Exp',pv:'SDK wraps gRPC errors. int32/64 casting issues.',sm:'Transaction MVP; SDK pain points fixed.',ef:'XL',st:'Q4 2026',dri:'EaaS Eng',na:'Revisit post-P0'},
+  {id:'c-nebula',readi:'watch',rl:'Watching',team:'All',name:'On-prem graph DB (NebulaGraph)',theme:'Cust Exp',pv:'Blocked on deployment strategy and ownership (CAPI vs SSCP).',sm:'NebulaGraph live for ≥1 production AI use-case.',ef:'TBD',st:'TBD',dri:'Sara M',na:'CAPI vs SSCP'},
+  {id:'c-kvrocks',readi:'watch',rl:'Watching',team:'RaaS',name:'Ephemeral store (KVRocks)',theme:'Cust Exp',pv:'SSD-based caching for latency-insensitive RaaS use cases.',sm:'Use cases moved to KVRocks.',ef:'TBD',st:'TBD',dri:'Sen Li',na:'Scoping'},
+ ],
+ q4:[
+  {id:'d-ods',readi:'ready',rl:'Ready',team:'RDB-KV',name:'OrderedDataStore on RDB',theme:'Cust Exp',pv:'CDC engine now exists. ODS indexes on PG ready to build.',sm:'100% OrderedDataStore on RDB.',ef:'XL',st:'H1 2027',dri:'RDB-KV Eng',na:'Scope build'},
+  {id:'d-cost',readi:'scope',rl:'Needs scoping',team:'All',name:'Cost attribution: ACTS + per-team',theme:'Efficiency',pv:'Carry-forward. High FinOps demand.',sm:'Per-team reports in Mosaic.',ef:'M',st:'Q1 2027',dri:'Leadership',na:'Confirm platform'},
+ ]
+};
+
+/* ===== assignments per quarter [eng,home,projId,pct] ===== */
+const AVAIL={'Sen Li':0.5,'Zijian Xie':0.8};
+const ASG={
+ q2:[
+  ['Zhixin Wen','RDB-KV','ktlo',0.2],['Trung Dinh','RDB-KV','ktlo',0.2],['Stephen Ma','RDB-KV','ktlo',0.2],['Meng Xu','RDB-KV','ktlo',0.2],['Michael Krishnan','RDB-KV','ktlo',0.2],
+  ['Yingjie He','RDB-PG','ktlo',0.1],['Bing Yang','RDB-PG','ktlo',0.1],['Shichao Jin','RDB-PG','ktlo',0.1],
+  ['Austen Schunk','EaaS','ktlo',0.2],['Cory Zhao','EaaS','ktlo',0.2],['Nathan Zhang','EaaS','ktlo',0.3],['Zhengyin Qian','EaaS','ktlo',0.2],['Shiming Song','EaaS','ktlo',0.2],['Jin Wang','EaaS','ktlo',0.3],['Zijian Xie','EaaS','ktlo',0.3],
+  ['Sen Li','RaaS','ktlo',0.5],['Anders Persson','RaaS','ktlo',0.2],['Vineesha Kasireddy','RaaS','ktlo',0.2],['Utkarsh Singh','RaaS','ktlo',0.2],['Pranish Pantha','RaaS','ktlo',0.4],
+  ['Peter Yao','QaaS','ktlo',0.5],['Julian Kudszus','QaaS','ktlo',1.0],
+  ['Weiji Hu','R3','ktlo',0.2],['Leon Gao','R3','ktlo',0.2],['Leo Luo','R3','ktlo',0.2],['Ankur Kulshrestha','R3','ktlo',0.2],['Derek Pham','R3','ktlo',0.2],['Julien Mo','R3','ktlo',0.2],['Yue Luo','R3','ktlo',0.2],
+  ['Will Hodges','SIM','ktlo',0.2],['Shenglin Du','SIM','ktlo',0.2],['Fred Liu','SIM','ktlo',0.2],['Gavin Wang','SIM','ktlo',0.2],['Hieu Pham','SIM','ktlo',0.2],['George Li','SIM','ktlo',0.2],['Jose Manjarrez','SIM','ktlo',0.2],
+  ['Rahul Yadav','MS SQL','ktlo',1.0],['Danny Avhad','MS SQL','ktlo',0.2],['Gopal Anand','MS SQL','ktlo',0.2],
+  ['Zhixin Wen','RDB-KV','creator',0.5],['Will Hodges','SIM','creator',0.8],['Stephen Ma','RDB-KV','creator',0.8],['Trung Dinh','RDB-KV','creator',0.3],
+  ['Meng Xu','RDB-KV','cell',0.8],['Michael Krishnan','RDB-KV','cell',0.8],['Shenglin Du','SIM','cell',0.8],['Austen Schunk','EaaS','cell',0.8],['Hieu Pham','SIM','cell',0.8],['Haocheng Zuo','RDB-KV','cell',1.0],['Zhixin Wen','RDB-KV','cell',0.3],
+  ['Trung Dinh','RDB-KV','flow',0.5],['Cory Zhao','EaaS','flow',0.6],['Zhengyin Qian','EaaS','flow',0.8],['Nathan Zhang','EaaS','flow',0.2],
+  ['Shiming Song','EaaS','staging',0.6],['Jin Wang','EaaS','staging',0.7],['Weiji Hu','R3','staging',0.8],['Fred Liu','SIM','staging',0.8],
+  ['Nathan Zhang','EaaS','cacherust',0.5],['Cory Zhao','EaaS','cacherust',0.2],
+  ['Pranish Pantha','RaaS','secrets',0.4],['Leo Luo','R3','secrets',0.8],['Peter Yao','QaaS','secrets',0.5],['Ravi Gullapalli','MS SQL','secrets',0.8],['George Li','SIM','secrets',0.8],['Qinghua Chen','SIM','secrets',0.5],['Gavin Wang','SIM','secrets',0.3],['Steven Wang','RDB-PG','secrets',0.5],
+  ['Julien Mo','R3','ssh',0.8],['Manav Kapoor','SIM','ssh',0.2],['Jose Manjarrez','SIM','ssh',0.2],['Danny Avhad','MS SQL','ssh',0.6],
+  ['Anders Persson','RaaS','raasstd',0.8],['Utkarsh Singh','RaaS','raasstd',0.8],['Vineesha Kasireddy','RaaS','raasstd',0.8],['Pranish Pantha','RaaS','raasstd',0.2],
+  ['Jose Manjarrez','SIM','crdbrel',0.7],['Manav Kapoor','SIM','crdbrel',0.7],['Steven Wang','RDB-PG','crdbrel',0.5],['Qinghua Chen','SIM','crdbrel',0.5],['Gavin Wang','SIM','crdbrel',0.8],
+  ['Bing Yang','RDB-PG','pgint',0.9],['Zijian Xie','EaaS','pgint',0.5],
+  ['Yingjie He','RDB-PG','vsearch',0.9],['Shichao Jin','RDB-PG','vsearch',0.2],
+  ['Huizhi Lu','QaaS','qaascreator',1.0],
+  ['Ankur Kulshrestha','R3','r3dr',0.8],
+  ['Leon Gao','R3','r3ec',0.8],
+ ],
+ q3:[
+  ['Zhixin Wen','RDB-KV','k3ktlo',0.2],['Trung Dinh','RDB-KV','k3ktlo',0.2],['Stephen Ma','RDB-KV','k3ktlo',0.2],['Meng Xu','RDB-KV','k3ktlo',0.2],
+  ['Yingjie He','RDB-PG','k3ktlo',0.1],['Bing Yang','RDB-PG','k3ktlo',0.2],['Shichao Jin','RDB-PG','k3ktlo',0.2],
+  ['Austen Schunk','EaaS','k3ktlo',0.2],['Cory Zhao','EaaS','k3ktlo',0.2],['Nathan Zhang','EaaS','k3ktlo',0.3],['Shiming Song','EaaS','k3ktlo',0.2],['Jin Wang','EaaS','k3ktlo',0.3],
+  ['Sen Li','RaaS','k3ktlo',0.5],['Anders Persson','RaaS','k3ktlo',0.2],['Utkarsh Singh','RaaS','k3ktlo',0.2],['Pranish Pantha','RaaS','k3ktlo',0.4],
+  ['Peter Yao','QaaS','k3ktlo',0.5],['Julian Kudszus','QaaS','k3ktlo',1.0],
+  ['Weiji Hu','R3','k3ktlo',0.3],['Leon Gao','R3','k3ktlo',0.3],['Leo Luo','R3','k3ktlo',0.3],['Ankur Kulshrestha','R3','k3ktlo',0.3],['Derek Pham','R3','k3ktlo',0.3],['Yue Luo','R3','k3ktlo',0.3],
+  ['Fred Liu','SIM','k3ktlo',0.3],['Gavin Wang','SIM','k3ktlo',0.2],['George Li','SIM','k3ktlo',0.2],['Jose Manjarrez','SIM','k3ktlo',0.2],
+  ['Rahul Yadav','MS SQL','k3ktlo',1.0],['Danny Avhad','MS SQL','k3ktlo',0.3],['Gopal Anand','MS SQL','k3ktlo',0.2],
+  ['Meng Xu','RDB-KV','k3cell',0.8],['Michael Krishnan','RDB-KV','k3cell',0.8],['Shenglin Du','SIM','k3cell',0.8],['Austen Schunk','EaaS','k3cell',0.6],['Haocheng Zuo','RDB-KV','k3cell',1.0],
+  ['Zhixin Wen','RDB-KV','k3creator',0.6],['Will Hodges','SIM','k3creator',0.8],['Stephen Ma','RDB-KV','k3creator',0.8],
+  ['Trung Dinh','RDB-KV','k3cdc',0.8],['Hieu Pham','SIM','k3cdc',0.8],['Michael Krishnan','RDB-KV','k3cdc',0.2],
+  ['Cory Zhao','EaaS','k3flow',0.8],['Zhengyin Qian','EaaS','k3flow',0.8],['Nathan Zhang','EaaS','k3flow',0.2],
+  ['Shiming Song','EaaS','k3staging',0.6],['Jin Wang','EaaS','k3staging',0.5],['Weiji Hu','R3','k3staging',0.5],
+  ['Pranish Pantha','RaaS','k3secrets',0.4],['Leo Luo','R3','k3secrets',0.5],['Ravi Gullapalli','MS SQL','k3secrets',0.5],['George Li','SIM','k3secrets',0.6],['Qinghua Chen','SIM','k3secrets',0.5],
+  ['Julien Mo','R3','k3ssh',0.6],['Manav Kapoor','SIM','k3ssh',0.3],['Danny Avhad','MS SQL','k3ssh',0.3],
+  ['Jose Manjarrez','SIM','k3crdb',0.6],['Manav Kapoor','SIM','k3crdb',0.5],['Steven Wang','RDB-PG','k3crdb',0.5],['Gavin Wang','SIM','k3crdb',0.6],
+  ['Bing Yang','RDB-PG','k3pg',0.7],['Zijian Xie','EaaS','k3pg',0.5],['Shichao Jin','RDB-PG','k3pg',0.4],
+  ['Huizhi Lu','QaaS','k3qaas',1.0],['Peter Yao','QaaS','k3qaas',0.5],
+  ['Anders Persson','RaaS','k3raas',0.8],['Utkarsh Singh','RaaS','k3raas',0.8],['Vineesha Kasireddy','RaaS','k3raas',0.8],
+ ],
+ q4:[
+  ['Zhixin Wen','RDB-KV','k4ktlo',1.0],['Peter Yao','QaaS','k4ktlo',1.0],['Rahul Yadav','MS SQL','k4ktlo',1.0],['Sen Li','RaaS','k4ktlo',0.5],['Weiji Hu','R3','k4ktlo',0.5],
+  ['Meng Xu','RDB-KV','k4multicell',1.0],['Haocheng Zuo','RDB-KV','k4multicell',1.0],['Michael Krishnan','RDB-KV','k4multicell',0.8],
+  ['Stephen Ma','RDB-KV','k4ddb',0.8],['Trung Dinh','RDB-KV','k4ddb',0.5],
+ ]
+};
+
+function engHome(){const m={};Object.values(ASG).forEach(list=>list.forEach(([e,h])=>{if(!m[e])m[e]=h}));return m;}
+let HOMEOF=engHome();
+
+let CUR='q3';
+const QLABEL={q2:'Q2 2026',q3:'Q3 2026',q4:'Q4 2026'};
+const QSTATE={q2:['Previous','closed'],q3:['Current','active'],q4:['Draft','draft']};
+const PREVQ={q2:null,q3:'q2',q4:'q3'};
+
+const projs=()=>PROJ[CUR];
+const back=()=>BACK[CUR];
+const backReady=()=>back().filter(b=>b.readi==='ready');
+const asg=()=>ASG[CUR];
+const findP=id=>projs().find(p=>p.id===id);
+const validAsg=()=>asg().filter(a=>findP(a[2]));
+const projHC=id=>asg().filter(a=>a[2]===id).reduce((s,a)=>s+a[3],0);
+const attrTeam=a=>{const p=findP(a[2]);if(!p)return a[1];return p.team!=='All'?p.team:a[1];};
+const orgAlloc=()=>validAsg().reduce((s,a)=>s+a[3],0);
+const teamAlloc=T=>validAsg().filter(a=>attrTeam(a)===T).reduce((s,a)=>s+a[3],0);
+const teamThemeAlloc=(T,th)=>validAsg().filter(a=>attrTeam(a)===T&&findP(a[2]).theme===th).reduce((s,a)=>s+a[3],0);
+const lentOut=T=>validAsg().filter(a=>{const p=findP(a[2]);return a[1]===T&&p.team!=='All'&&p.team!==T}).reduce((s,a)=>s+a[3],0);
+const borrowedIn=T=>validAsg().filter(a=>{const p=findP(a[2]);return a[1]!==T&&p.team!=='All'&&p.team===T}).reduce((s,a)=>s+a[3],0);
+const effective=T=>+(HOME[T]-lentOut(T)+borrowedIn(T)).toFixed(1);
+
+/* theme HC for any quarter (for QoQ) */
+function themeHCfor(q){const r={};THEMES.forEach(t=>r[t]=0);(ASG[q]||[]).forEach(a=>{const p=(PROJ[q]||[]).find(x=>x.id===a[2]);if(p)r[p.theme]+=a[3];});return r;}
+const orgAllocFor=q=>(ASG[q]||[]).reduce((s,a)=>(PROJ[q]||[]).find(x=>x.id===a[2])?s+a[3]:s,0);
+
+/* top priorities */
+const PRIO={
+ q2:[{h:'KTLO',b:'Keep every service running: 24×7 ops, oncall, baseline security and compliance.'},
+  {h:'System reliability',b:'EaaS flow control + RDB-KV stability. 70% QoQ reduction in P0 incidents.'},
+  {h:'Security baseline',b:'Secrets rotation via Secret Broker, SSH lockdown, pod access audit.'},
+  {h:'RDB-KV mega-goal',b:'Creator DataStore + Frost P13N. 26 universes on RDB.'}],
+ q3:[{h:'KTLO',b:'Keep every service running: 24×7 ops, oncall, optimizations, baseline security and compliance (zero-day patching, SOX/SOC2).'},
+  {h:'System reliability',b:'Cell stability GA, CDC engine, flow control phase 3. Target 70% QoQ reduction in P0 incidents, zero recurring.'},
+  {h:'Security enforcement',b:'Secrets enforcement active across all MDS-managed services. SSH lockdown completion, Grimlock POC.'},
+  {h:'RDB-KV source of truth',b:'Creator DataStore GA. 26 universes on RDB as source of truth, six-month SoT clock started.'}],
+ q4:[{h:'Multi-cell to production',b:'Draft. Begin multi-cell production rollout on RKS.'},
+  {h:'Efficiency',b:'Draft. Start DDB decommission after SoT period, stand up cost attribution.'}]
+};
+
+/* people / access */
+let people=[
+ {name:'Sara M',role:'Admin',scope:'All'},
+ {name:'Dave Hodson',role:'Editor',scope:'All'},
+ {name:'Dikang Gu',role:'Editor',scope:'RDB-KV'},
+ {name:'Kai Liu',role:'Viewer',scope:'EaaS'},
+ {name:'Anupam S',role:'Viewer',scope:'All'},
+];
+let me='Sara M',editMode=false;
+const READI=[['ready','Ready'],['scope','Needs scoping'],['parked','Parked'],['watch','Watching']];
+
+let logs=[
+ ['Sara M','Moved <b>Erasure coding EC(6,4)</b> above the line','today · 9:42'],
+ ['Dikang Gu','Set <b>Shenglin Du</b> to 0.8 on Cell stability, borrowed from SIM','today · 8:15'],
+ ['Sara M','Granted <b>Dave Hodson</b> editor access, scope all teams','yest · 17:30'],
+];
+function log(t){logs.unshift([me,t,'just now']);if(document.getElementById('logList'))renderLog();}
+
+/* ===== gating ===== */
+function meRec(){return people.find(p=>p.name===me)||{role:'Viewer',scope:'All'};}
+function quarterOpen(){return CUR!=='q2';} /* q2 is the closed previous quarter */
+function canEditAnything(){const r=meRec().role;return quarterOpen()&&(r==='Admin'||r==='Editor');}
+function canEditTeam(T){if(!quarterOpen())return false;const r=meRec();if(r.role==='Admin')return true;if(r.role==='Editor')return r.scope==='All'||r.scope===T;return false;}
+function isAdmin(){return meRec().role==='Admin'&&quarterOpen();}
+function refreshGate(){
+  const r=meRec();
+  document.getElementById('roletag').textContent=r.role;document.getElementById('roletag').className='roletag '+r.role;
+  const canEdit=canEditAnything();
+  const btn=document.getElementById('editToggle');
+  btn.classList.toggle('hide',!canEdit);
+  if(!canEdit){editMode=false;btn.classList.remove('on');btn.innerHTML='<span>✎</span> Edit';}
+  document.body.dataset.edit=editMode?'true':'false';
+  const ban=document.getElementById('robanner');let show=true;
+  if(!quarterOpen())ban.innerHTML='<b>'+QLABEL[CUR]+' is closed.</b> Read-only history. This is what the previous quarter committed.';
+  else if(r.role==='Viewer')ban.innerHTML='<b>View only.</b> You are '+me+', a viewer. Edit access is granted from the Access tab.';
+  else if(r.role==='Editor'&&r.scope!=='All')ban.innerHTML='<b>Scoped editing.</b> As '+me+' you can edit '+r.scope+' initiatives, staffing and the backlog. Other teams are read-only.';
+  else show=false;
+  document.body.dataset.showBanner=show?'true':'false';
+  document.getElementById('addInit').disabled=!canEdit;
+  document.getElementById('addAsg').disabled=!canEdit;
+  document.getElementById('addBack').disabled=!canEdit;
+  document.getElementById('lendAdd').disabled=!canEdit;
+  document.getElementById('addPrio').style.display=editMode?'':'none';
+  document.getElementById('addPerson').disabled=!isAdmin();
+}
+
+/* ===== roadmap ===== */
+let dragRef=null,activeRoad='all';
+function dris(id){
+  const names=[...new Set(asg().filter(a=>a[2]===id).sort((a,b)=>b[3]-a[3]).map(a=>a[0]))].slice(0,3);
+  if(!names.length)return '<span class="small">unstaffed</span>';
+  return '<span class="dris">'+names.map(n=>`<span class="av" title="${n}">${ini(n)}</span>`).join('')+'</span>';
+}
+function themeTag(t){return `<span class="themetag" style="background:${themeColor[t]}22;color:${themeColor[t]}">${t}</span>`;}
+function renderRoad(){
+  const ab=projs(),be=backReady();
+  document.getElementById('tbAbove').innerHTML=ab.map(p=>`
+   <tr class="rrow dragok" draggable="true" data-id="${p.id}" data-team="${p.team}">
+     <td><span class="handle">⠿</span></td>
+     <td><span class="pri ${p.pri}">${p.pri}</span></td>
+     <td><span class="team" style="background:${teamColor[p.team]}">${p.team}</span></td>
+     <td><span class="iname">${p.name}</span></td>
+     <td>${themeTag(p.theme)}</td>
+     <td class="small">${p.del||''}</td><td class="small">${p.met||''}</td>
+     <td class="num"><span class="hcpill">${projHC(p.id).toFixed(1)}</span></td>
+     <td>${dris(p.id)}</td>
+     <td><div class="actcell"><button class="iconbtn" data-openproj="${p.id}" title="Edit">✎</button><button class="iconbtn movebtn" data-move="${p.id}" data-to="below" title="Defer">↓</button></div></td>
+   </tr>`).join('')||'<tr><td colspan="10" class="small" style="padding:16px">No committed initiatives yet.</td></tr>';
+  document.getElementById('tbBelow').innerHTML=be.map(b=>`
+   <tr class="rrow dragok" draggable="true" data-bid="${b.id}" data-team="${b.team}">
+     <td><span class="handle">⠿</span></td>
+     <td><span class="pri def">Def</span></td>
+     <td><span class="team" style="background:${teamColor[b.team]}">${b.team}</span></td>
+     <td><span class="iname">${b.name}</span></td>
+     <td>${themeTag(b.theme||'Cust Exp')}</td>
+     <td class="small">${b.pv||''}</td><td><span class="readi ready">Ready</span></td>
+     <td><div class="actcell"><button class="iconbtn" data-openback="${b.id}" title="Edit">✎</button><button class="iconbtn movebtn" data-commit="${b.id}" title="Commit">↑</button></div></td>
+   </tr>`).join('')||'<tr><td colspan="8" class="small" style="padding:16px">No Ready items in the backlog. Mark a backlog item Ready and it appears here.</td></tr>';
+  bindRoad();applyRoad();recompute();
+  document.getElementById('nv-road').textContent=ab.length+' live';
+}
+function bindRoad(){
+  document.querySelectorAll('[data-openproj]').forEach(b=>b.onclick=()=>openProjDrawer(b.dataset.openproj));
+  document.querySelectorAll('[data-openback]').forEach(b=>b.onclick=()=>openBackDrawer(b.dataset.openback));
+  document.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>deferProj(b.dataset.move));
+  document.querySelectorAll('[data-commit]').forEach(b=>b.onclick=()=>commitBack(b.dataset.commit));
+  document.querySelectorAll('#v-roadmap .rrow').forEach(r=>{
+    r.addEventListener('dragstart',e=>{if(!editMode){e.preventDefault();return;}dragRef=r.dataset.id?{type:'proj',id:r.dataset.id}:{type:'back',id:r.dataset.bid};r.classList.add('drag');});
+    r.addEventListener('dragend',()=>{r.classList.remove('drag');document.querySelectorAll('.dropzone').forEach(z=>z.classList.remove('drop'))});
+  });
+  [['zoneAbove','above'],['zoneBelow','below']].forEach(([id,line])=>{
+    const z=document.getElementById(id);
+    z.ondragover=e=>{if(!editMode)return;e.preventDefault();z.classList.add('drop')};
+    z.ondragleave=()=>z.classList.remove('drop');
+    z.ondrop=e=>{e.preventDefault();z.classList.remove('drop');if(!dragRef)return;
+      if(line==='below'&&dragRef.type==='proj')deferProj(dragRef.id);
+      if(line==='above'&&dragRef.type==='back')commitBack(dragRef.id);
+      dragRef=null;};
+  });
+}
+function deferProj(id){
+  if(!editMode){alert('Turn on Edit to change this.');return;}
+  const p=findP(id);if(!canEditTeam(p.team)){alert('Out of your edit scope.');return;}
+  back().unshift({id:'b'+nid(),readi:'ready',rl:'Ready',team:p.team,name:p.name,theme:p.theme,pv:p.del||'Deferred from the roadmap.',sm:p.met||'',ef:'M',st:QLABEL[PREVQ[CUR]?CUR:'q4'],dri:leadOf[p.team]||'',na:'Reconsider next planning'});
+  PROJ[CUR]=projs().filter(x=>x.id!==id);ASG[CUR]=asg().filter(a=>a[2]!==id);
+  renderAll();log('deferred "'+p.name+'" to the Ready backlog');
+}
+function commitBack(bid){
+  if(!editMode){alert('Turn on Edit to change this.');return;}
+  const b=back().find(x=>x.id===bid);if(!canEditTeam(b.team)){alert('Out of your edit scope.');return;}
+  projs().push({id:nid(),pri:'P1',team:TEAMLIST.includes(b.team)?b.team:'All',name:b.name,theme:b.theme||'Cust Exp',del:b.pv||'',met:b.sm||''});
+  BACK[CUR]=back().filter(x=>x.id!==bid);
+  renderAll();log('committed "'+b.name+'" from the backlog (unstaffed, assign people on Capacity)');
+}
+
+function applyRoad(){
+  document.querySelectorAll('#v-roadmap .rrow').forEach(r=>r.style.display=(activeRoad==='all'||r.dataset.team===activeRoad||r.dataset.team==='All')?'':'none');
+  const vis=[...document.querySelectorAll('#v-roadmap .rrow')].filter(r=>r.style.display!=='none').length;
+  document.getElementById('roadCount').textContent=vis+' initiatives';
+}
+function recompute(){
+  const used=orgAlloc(),pct=Math.min(used/CAP*100,118);
+  const bar=document.getElementById('capbar'),flag=document.getElementById('overflag');
+  document.getElementById('capfill').style.width=pct+'%';
+  document.getElementById('capUsed').textContent=used.toFixed(1);
+  document.getElementById('committedHC').textContent=used.toFixed(1)+' HC';
+  const over=+(used-CAP).toFixed(1);
+  if(over>0.05){bar.classList.add('over');flag.textContent='Over capacity by '+over.toFixed(1)+' HC';flag.style.background='var(--red-soft)';flag.style.color='var(--red)';}
+  else if(over>-0.05){bar.classList.remove('over');flag.textContent='At capacity';flag.style.background='var(--petrol-soft)';flag.style.color='var(--petrol)';}
+  else{bar.classList.remove('over');flag.textContent=(-over).toFixed(1)+' HC unallocated';flag.style.background='var(--green-soft)';flag.style.color='var(--green)';}
+}
+
+/* ===== drawers ===== */
+let drawerProj=null,drawerBack=null;
+function openProjDrawer(id){
+  if(!editMode){alert('Turn on Edit to change this.');return;}
+  const p=findP(id);if(!canEditTeam(p.team)){alert('Out of your edit scope.');return;}
+  drawerProj=id;drawerBack=null;
+  document.getElementById('dTitle').textContent='Edit initiative';
+  document.getElementById('dDel').style.display='';
+  document.getElementById('dBody').innerHTML=`
+   <div class="frow"><div><label class="fl">Priority</label><select class="fin" id="f-pri">${PRIS.map(x=>`<option ${x===p.pri?'selected':''}>${x}</option>`).join('')}</select></div>
+   <div><label class="fl">Team</label><select class="fin" id="f-team">${['All'].concat(TEAMLIST).map(t=>`<option ${t===p.team?'selected':''}>${t}</option>`).join('')}</select></div></div>
+   <label class="fl">Initiative name</label><input class="fin" id="f-name" value="${(p.name||'').replace(/"/g,'&quot;')}">
+   <label class="fl">Theme</label><select class="fin" id="f-theme">${THEMES.map(t=>`<option ${t===p.theme?'selected':''}>${t}</option>`).join('')}</select>
+   <label class="fl">Deliverables</label><textarea class="fin" id="f-del" rows="3">${p.del||''}</textarea>
+   <label class="fl">Metrics & targets</label><textarea class="fin" id="f-met" rows="2">${p.met||''}</textarea>
+   <label class="fl">Staffing — assign engineers (% of time)</label><div id="asgList"></div>
+   <div class="addasg"><select id="asgEng"></select><input id="asgPct" type="number" step="0.1" min="0" max="1" placeholder="0.5"><button id="asgAdd">Add</button></div>
+   <div class="asgsum" id="asgSum"></div>`;
+  renderDrawerAsg();
+  document.getElementById('asgAdd').onclick=()=>{const e=document.getElementById('asgEng').value,pct=parseFloat(document.getElementById('asgPct').value);if(!e||!pct)return;asg().push([e,HOMEOF[e]||p.team,id,pct]);HOMEOF=engHome();renderDrawerAsg();renderAll();};
+  document.getElementById('dDel').onclick=()=>{PROJ[CUR]=projs().filter(x=>x.id!==id);ASG[CUR]=asg().filter(a=>a[2]!==id);closeDrawer();renderAll();log('deleted "'+p.name+'"');};
+  document.getElementById('dSave').onclick=()=>{p.pri=val('f-pri');p.team=val('f-team');p.name=val('f-name');p.theme=val('f-theme');p.del=val('f-del');p.met=val('f-met');closeDrawer();renderAll();log('edited "'+p.name+'"');};
+  openDrawer();
+}
+function renderDrawerAsg(){
+  const rows=asg().map((a,i)=>[a,i]).filter(([a])=>a[2]===drawerProj);
+  document.getElementById('asgList').innerHTML=rows.map(([a,i])=>`<div class="asg"><span class="nm">${a[0]}</span><span class="ht" style="background:${teamColor[a[1]]}">${a[1]}</span><input type="number" step="0.1" min="0" max="1" value="${a[3]}" data-ai="${i}"><button class="rm" data-rm="${i}">✕</button></div>`).join('')||'<div class="small">No one assigned yet.</div>';
+  const total=rows.reduce((s,[a])=>s+a[3],0);
+  document.getElementById('asgSum').textContent='Initiative HC = '+total.toFixed(1)+' (sum of assignments)';
+  const used=new Set(rows.map(([a])=>a[0]));
+  document.getElementById('asgEng').innerHTML='<option value="">add engineer…</option>'+Object.keys(HOMEOF).filter(e=>!used.has(e)).sort().map(e=>`<option value="${e}">${e} · ${HOMEOF[e]}</option>`).join('');
+  document.querySelectorAll('#asgList [data-ai]').forEach(inp=>inp.onchange=()=>{asg()[+inp.dataset.ai][3]=parseFloat(inp.value)||0;renderDrawerAsg();renderAll();});
+  document.querySelectorAll('#asgList [data-rm]').forEach(b=>b.onclick=()=>{asg().splice(+b.dataset.rm,1);renderDrawerAsg();renderAll();});
+}
+function openBackDrawer(bid){
+  if(!editMode){alert('Turn on Edit to change this.');return;}
+  const b=back().find(x=>x.id===bid);if(!canEditTeam(b.team)){alert('Out of your edit scope.');return;}
+  drawerBack=bid;drawerProj=null;
+  document.getElementById('dTitle').textContent='Edit backlog item';
+  document.getElementById('dDel').style.display='';
+  document.getElementById('dBody').innerHTML=`
+   <div class="frow"><div><label class="fl">Readiness</label><select class="fin" id="b-rd">${READI.map(([v,l])=>`<option value="${v}" ${v===b.readi?'selected':''}>${l}</option>`).join('')}</select></div>
+   <div><label class="fl">Team</label><select class="fin" id="b-team">${['All'].concat(TEAMLIST).map(t=>`<option ${t===b.team?'selected':''}>${t}</option>`).join('')}</select></div></div>
+   <label class="fl">Initiative name</label><input class="fin" id="b-name" value="${(b.name||'').replace(/"/g,'&quot;')}">
+   <label class="fl">Theme</label><select class="fin" id="b-theme">${THEMES.map(t=>`<option ${t===(b.theme||'Cust Exp')?'selected':''}>${t}</option>`).join('')}</select>
+   <label class="fl">Problem / value</label><textarea class="fin" id="b-pv" rows="3">${b.pv||''}</textarea>
+   <label class="fl">Success metric</label><textarea class="fin" id="b-sm" rows="2">${b.sm||''}</textarea>
+   <div class="frow"><div><label class="fl">Effort</label><input class="fin" id="b-ef" value="${b.ef||''}"></div><div><label class="fl">Earliest</label><input class="fin" id="b-st" value="${b.st||''}"></div></div>
+   <div class="frow"><div><label class="fl">Requestor / DRI</label><input class="fin" id="b-dri" value="${b.dri||''}"></div><div><label class="fl">Next action</label><input class="fin" id="b-na" value="${b.na||''}"></div></div>
+   <div class="asgsum">Mark this Ready and it appears below the line on the roadmap.</div>`;
+  document.getElementById('dDel').onclick=()=>{BACK[CUR]=back().filter(x=>x.id!==bid);closeDrawer();renderAll();log('deleted backlog item "'+b.name+'"');};
+  document.getElementById('dSave').onclick=()=>{b.readi=val('b-rd');b.rl=READI.find(r=>r[0]===b.readi)[1];b.team=val('b-team');b.name=val('b-name');b.theme=val('b-theme');b.pv=val('b-pv');b.sm=val('b-sm');b.ef=val('b-ef');b.st=val('b-st');b.dri=val('b-dri');b.na=val('b-na');closeDrawer();renderAll();log('edited backlog item "'+b.name+'"');};
+  openDrawer();
+}
+const val=id=>document.getElementById(id).value;
+function openDrawer(){document.getElementById('scrim').classList.add('on');document.getElementById('drawer').classList.add('on');}
+function closeDrawer(){document.getElementById('scrim').classList.remove('on');document.getElementById('drawer').classList.remove('on');drawerProj=null;drawerBack=null;}
+document.getElementById('dClose').onclick=closeDrawer;document.getElementById('scrim').onclick=closeDrawer;
+document.getElementById('addInit').onclick=()=>{const id=nid();projs().push({id,pri:'P1',team:isAdmin()?'RDB-KV':meRec().scope,name:'New initiative',theme:'Reliability',del:'',met:''});renderAll();openProjDrawer(id);};
+document.getElementById('addBack').onclick=()=>{const id='b'+nid();back().unshift({id,readi:'scope',rl:'Needs scoping',team:'RDB-KV',name:'New backlog item',theme:'Cust Exp',pv:'',sm:'',ef:'M',st:'TBD',dri:'',na:'Scope'});renderAll();openBackDrawer(id);};
+
+/* ===== exec ===== */
+function renderExec(){
+  const total=orgAlloc();
+  const byTheme=themeHCfor(CUR);
+  // donut
+  let acc=0;const segs=[];
+  THEMES.forEach(t=>{const v=byTheme[t];if(v>0&&total>0){const p=v/total*100;segs.push(`${themeColor[t]} ${acc}% ${acc+p}%`);acc+=p;}});
+  document.getElementById('donut').style.background=segs.length?`conic-gradient(${segs.join(',')})`:'#ece8df';
+  document.getElementById('donutTot').textContent=total.toFixed(0);
+  document.getElementById('donutLegend').innerHTML=THEMES.map(t=>{const v=byTheme[t],p=total?v/total*100:0;return `<div class="lgrow"><span class="sw" style="background:${themeColor[t]}"></span><span class="nm">${t}</span><span class="vv"><b>${p.toFixed(0)}%</b> · ${v.toFixed(1)} HC</span></div>`;}).join('');
+  // stats
+  document.getElementById('ex-hc').textContent=total.toFixed(1);
+  document.getElementById('ex-hc-d').textContent=(total/CAP*100).toFixed(1)+'% of org capacity';
+  const ab=projs();
+  document.getElementById('ex-init').textContent=ab.length;
+  document.getElementById('ex-init-d').textContent=ab.filter(p=>p.pri==='P0').length+' P0 · '+ab.filter(p=>p.pri==='P1').length+' P1';
+  document.getElementById('ex-free').textContent=Math.max(0,+(CAP-total).toFixed(1));
+  document.getElementById('ex-def').textContent=backReady().length;
+  renderQoq();renderPrio();
+  // team table
+  document.querySelector('#execTeam tbody').innerHTML=TEAMLIST.map(T=>{
+    const home=HOME[T],eff=effective(T),alloc=+teamAlloc(T).toFixed(1),gap=+(alloc-eff).toFixed(1);
+    const gcls=gap>0.05?'pos':gap<-0.05?'neg':'zero';
+    const inits=ab.filter(p=>p.team===T);
+    const commits=inits.length?inits.map(p=>`<b>${p.pri}</b> ${p.name}`).join('<br>'):'<span style="color:var(--muted-2)">shared / KTLO only</span>';
+    const tot=alloc||1;
+    const fa=THEMES.map(th=>{const v=teamThemeAlloc(T,th);return v>0?`<span style="color:${themeColor[th]}">${th} <b>${(v/tot*100).toFixed(0)}%</b> (${v.toFixed(1)} HC)</span>`:'';}).filter(Boolean).join('<br>');
+    return `<tr><td><span class="team" style="background:${teamColor[T]}">${T}</span></td>
+     <td class="num">${home.toFixed(1)}</td><td class="num">${eff.toFixed(1)}</td><td class="num"><b>${alloc.toFixed(1)}</b></td>
+     <td class="num"><span class="gapcell ${Math.abs(gap)>0.05?'hl':''} gap ${gcls}">${gap>0?'+':''}${gap.toFixed(1)}</span></td>
+     <td class="commit-list">${commits}</td><td class="focusmini">${fa||'<span class="small">—</span>'}</td></tr>`;
+  }).join('');
+}
+function renderQoq(){
+  const prev=PREVQ[CUR];const body=document.getElementById('qoqBody');
+  if(!prev){document.getElementById('qoqMeta').textContent='No earlier quarter to compare';body.innerHTML='<div class="sp" style="padding:8px 0">'+QLABEL[CUR]+' is the earliest quarter in view.</div>';return;}
+  document.getElementById('qoqMeta').textContent='Theme HC shift, '+QLABEL[prev]+' → '+QLABEL[CUR];
+  const cur=themeHCfor(CUR),pr=themeHCfor(prev);
+  let rows=`<div class="qoqhead"><span class="nm">Theme</span><span class="pr">${QLABEL[prev].split(' ')[0]}</span><span class="ar"></span><span class="cu">${QLABEL[CUR].split(' ')[0]}</span><span class="dl">Shift</span></div>`;
+  rows+=THEMES.map(t=>{const a=pr[t]||0,b=cur[t]||0,d=+(b-a).toFixed(1);const cls=d>0.05?'up':d<-0.05?'down':'flat';const arrow=d>0.05?'↗':d<-0.05?'↘':'→';
+    return `<div class="qoqrow"><span class="nm"><span class="sw" style="background:${themeColor[t]}"></span>${t}</span><span class="pr">${a.toFixed(1)}</span><span class="ar">${arrow}</span><span class="cu">${b.toFixed(1)}</span><span class="dl ${cls}">${d>0?'+':''}${d.toFixed(1)} HC</span></div>`;}).join('');
+  const ta=orgAllocFor(prev),tb=orgAllocFor(CUR),td=+(tb-ta).toFixed(1);
+  rows+=`<div class="qoqrow" style="border-top:1px solid var(--line);font-weight:600"><span class="nm">Total allocated</span><span class="pr">${ta.toFixed(1)}</span><span class="ar"></span><span class="cu">${tb.toFixed(1)}</span><span class="dl ${td>0.05?'up':td<-0.05?'down':'flat'}">${td>0?'+':''}${td.toFixed(1)} HC</span></div>`;
+  body.innerHTML=rows;
+}
+function renderPrio(){
+  const list=PRIO[CUR]||[];
+  document.getElementById('prioList').innerHTML=list.map((p,i)=>`
+   <div class="pl"><span class="n serif">${i+1}</span>
+   <div class="body">${editMode?`<input class="edt" value="${p.h.replace(/"/g,'&quot;')}" data-ph="${i}" style="font-weight:600;margin-bottom:4px"><textarea class="edt" data-pb="${i}" rows="2">${p.b}</textarea>`:`<b>${p.h}.</b> ${p.b}`}</div>
+   <button class="iconbtn rm" data-prm="${i}">✕</button></div>`).join('');
+  if(editMode){
+    document.querySelectorAll('[data-ph]').forEach(i=>i.onchange=()=>{list[+i.dataset.ph].h=i.value;});
+    document.querySelectorAll('[data-pb]').forEach(i=>i.onchange=()=>{list[+i.dataset.pb].b=i.value;});
+    document.querySelectorAll('[data-prm]').forEach(b=>b.onclick=()=>{list.splice(+b.dataset.prm,1);renderPrio();log('edited top priorities');});
+  }
+}
+document.getElementById('addPrio').onclick=()=>{(PRIO[CUR]=PRIO[CUR]||[]).push({h:'New priority',b:'Describe it.'});renderPrio();};
+
+/* ===== capacity ===== */
+function renderCap(){
+  document.querySelector('#capTeam tbody').innerHTML=TEAMLIST.map(T=>{
+    const home=HOME[T],eff=effective(T),alloc=+teamAlloc(T).toFixed(1),net=+(eff-home).toFixed(1);
+    const ncls=net>0?'plus':net<0?'minus':'zero',over=alloc>eff+0.05,w=Math.min(eff/9*100,100);
+    return `<tr><td><span class="team" style="background:${teamColor[T]}">${T}</span></td><td>${leadOf[T]}</td>
+     <td class="num">${home.toFixed(1)}</td><td class="num"><b>${eff.toFixed(1)}</b></td><td class="num">${alloc.toFixed(1)}</td>
+     <td class="num netpos ${ncls}">${net>0?'+':''}${net.toFixed(1)}</td>
+     <td><span class="minibar"><i class="${over?'over':''}" style="width:${w}%"></i></span></td></tr>`;
+  }).join('');
+  const engs={};asg().forEach((a,i)=>{if(!findP(a[2]))return;(engs[a[0]]=engs[a[0]]||{home:a[1],items:[]}).items.push([a,i]);});
+  const names=Object.keys(engs).sort((a,b)=>engs[a].home.localeCompare(engs[b].home)||a.localeCompare(b));
+  document.querySelector('#icTable tbody').innerHTML=names.map(n=>{
+    const e=engs[n],tot=+e.items.reduce((s,[a])=>s+a[3],0).toFixed(1),av=AVAIL[n]||1;
+    const st=Math.abs(tot-av)<0.05?'bal':tot>av?'over':'under';
+    const lbl=st==='bal'?'Balanced':st==='over'?'Over by '+(tot-av).toFixed(1):'Under by '+(av-tot).toFixed(1);
+    const chips=e.items.map(([a,i])=>{
+      const p=findP(a[2]),cross=p.team!=='All'&&p.team!==a[1];
+      const pctCtl=editMode?`<input type="number" step="0.1" min="0" max="1" value="${a[3]}" data-cap="${i}">`:`<b>${a[3].toFixed(1)}</b>`;
+      const rm=editMode?`<button class="rm" data-caprm="${i}" title="Remove">✕</button>`:'';
+      return `<span class="pchip ${cross?'cross':''}" title="${p.name}">${p.name.split(':')[0].slice(0,26)} ${pctCtl}${rm}</span>`;
+    }).join('');
+    const assigned=new Set(e.items.map(([a])=>a[2]));
+    const adder=editMode?`<div class="engadd"><select data-engadd="${n}"><option value="">+ project…</option>${projs().filter(p=>!assigned.has(p.id)).map(p=>`<option value="${p.id}">${p.name.split(':')[0].slice(0,30)}</option>`).join('')}</select><input type="number" step="0.1" min="0" max="1" placeholder="0.5" data-engpct="${n}"><button data-engdo="${n}">add</button></div>`:'';
+    return `<tr><td><b>${n}</b></td><td><span class="team" style="background:${teamColor[e.home]}">${e.home}</span></td>
+     <td>${chips}${adder}</td><td class="num">${Math.round(tot/av*100)}%</td>
+     <td><span class="dot ${st}"></span>${lbl}</td></tr>`;
+  }).join('')||'<tr><td colspan="5" class="small" style="padding:16px">No assignments yet.</td></tr>';
+  document.getElementById('capCount').textContent=names.length+' engineers staffed · '+orgAlloc().toFixed(1)+' HC allocated';
+  if(editMode){
+    document.querySelectorAll('[data-cap]').forEach(inp=>inp.onchange=()=>{asg()[+inp.dataset.cap][3]=parseFloat(inp.value)||0;renderAll();});
+    document.querySelectorAll('[data-caprm]').forEach(b=>b.onclick=()=>{asg().splice(+b.dataset.caprm,1);renderAll();});
+    document.querySelectorAll('[data-engdo]').forEach(b=>b.onclick=()=>{const n=b.dataset.engdo;const pid2=document.querySelector(`[data-engadd="${n}"]`).value;const pct=parseFloat(document.querySelector(`[data-engpct="${n}"]`).value);if(!pid2||!pct){alert('Pick a project and a percentage.');return;}asg().push([n,HOMEOF[n]||findP(pid2).team,pid2,pct]);renderAll();log('assigned '+n+' to '+findP(pid2).name.split(':')[0]);});
+  }
+}
+document.getElementById('addAsg').onclick=()=>{
+  const e=prompt('Engineer name:');if(!e)return;
+  const opts=projs().map(p=>p.id+' = '+p.name.split(':')[0]).join('\n');
+  const pr=prompt('Project id:\n\n'+opts,projs()[0]?projs()[0].id:'');if(!findP(pr)){alert('No committed project with that id.');return;}
+  const pct=parseFloat(prompt('Allocation 0–1:','0.5'))||0;
+  asg().push([e,HOMEOF[e]||findP(pr).team,pr,pct]);HOMEOF=engHome();renderAll();log('assigned '+e+' to '+findP(pr).name.split(':')[0]);
+};
+
+/* ===== lending ===== */
+function refreshLendForm(){
+  const engSel=document.getElementById('lendEng'),projSel=document.getElementById('lendProj');
+  const engs=[...new Set(asg().map(a=>a[0]))].sort();
+  const roster=[...new Set(engs.concat(Object.keys(HOMEOF)))].sort();
+  engSel.innerHTML='<option value="">engineer…</option>'+roster.map(e=>`<option value="${e}">${e} · ${HOMEOF[e]||'?'}</option>`).join('');
+  function fillProj(){
+    const home=HOMEOF[engSel.value];
+    const opts=projs().filter(p=>p.team!=='All'&&p.team!==home);
+    projSel.innerHTML='<option value="">to project on another team…</option>'+opts.map(p=>`<option value="${p.id}">${p.team} · ${p.name.split(':')[0].slice(0,28)}</option>`).join('');
+    document.getElementById('lendHint').textContent=engSel.value?(opts.length?'':'No cross-team projects available for this person'):'';
+  }
+  engSel.onchange=fillProj;fillProj();
+}
+document.getElementById('lendAdd').onclick=()=>{
+  const e=document.getElementById('lendEng').value,pr=document.getElementById('lendProj').value,pct=parseFloat(document.getElementById('lendPct').value);
+  if(!e||!pr||!pct){alert('Pick an engineer, a project on another team, and a percentage.');return;}
+  asg().push([e,HOMEOF[e]||findP(pr).team,pr,pct]);renderAll();log('lent '+e+' ('+pct.toFixed(1)+') to '+findP(pr).name.split(':')[0]);
+  document.getElementById('lendPct').value='';
+};
+function renderLending(){
+  refreshLendForm();
+  const loans=asg().map((a,i)=>[a,i]).filter(([a])=>{const p=findP(a[2]);return p&&p.team!=='All'&&p.team!==a[1];});
+  document.querySelector('#loanTable tbody').innerHTML=loans.map(([a,i])=>{
+    const p=findP(a[2]);
+    const pctCtl=editMode?`<input class="edt num" type="number" step="0.1" min="0" max="1" value="${a[3]}" data-loan="${i}">`:a[3].toFixed(1);
+    return `<tr><td><b>${a[0]}</b></td><td><span class="team" style="background:${teamColor[a[1]]}">${a[1]}</span><span class="flowarrow">→</span><span class="team" style="background:${teamColor[p.team]}">${p.team}</span></td>
+     <td class="small">${p.name}</td><td class="num">${pctCtl}</td>
+     <td><div class="actcell"><button class="iconbtn" data-loanrm="${i}" title="Remove loan">✕</button></div></td></tr>`;
+  }).join('')||'<tr><td colspan="5" class="small" style="padding:14px">No cross-team loans this quarter.</td></tr>';
+  const lent={},bor={};TEAMLIST.forEach(t=>{lent[t]=0;bor[t]=0;});
+  loans.forEach(([a])=>{const p=findP(a[2]);lent[a[1]]+=a[3];bor[p.team]+=a[3];});
+  document.querySelector('#netTable tbody').innerHTML=TEAMLIST.map(T=>{
+    const net=+(effective(T)-HOME[T]).toFixed(1),cls=net>0?'plus':net<0?'minus':'zero';
+    return `<tr><td><span class="team" style="background:${teamColor[T]}">${T}</span></td>
+     <td class="num">${HOME[T].toFixed(1)}</td><td class="num">${lent[T]?'−'+lent[T].toFixed(1):'—'}</td>
+     <td class="num">${bor[T]?'+'+bor[T].toFixed(1):'—'}</td>
+     <td class="num netpos ${cls}">${net>0?'+':''}${net.toFixed(1)}</td><td class="num"><b>${effective(T).toFixed(1)}</b></td></tr>`;
+  }).join('');
+  if(editMode){
+    document.querySelectorAll('[data-loan]').forEach(inp=>inp.onchange=()=>{asg()[+inp.dataset.loan][3]=parseFloat(inp.value)||0;renderAll();});
+    document.querySelectorAll('[data-loanrm]').forEach(b=>b.onclick=()=>{const a=asg()[+b.dataset.loanrm];asg().splice(+b.dataset.loanrm,1);renderAll();log('removed loan: '+a[0]);});
+  }
+}
+
+/* ===== backlog ===== */
+let activeBack='all';
+function renderBacklog(){
+  const rows=back().map((b,idx)=>[b,idx]).filter(([b])=>activeBack==='all'||b.team===activeBack||b.team==='All');
+  document.querySelector('#backTable tbody').innerHTML=rows.map(([b,idx])=>{
+    if(editMode){
+      return `<tr class="rrow">
+       <td><select class="edt" data-brd="${idx}">${READI.map(([v,l])=>`<option value="${v}" ${v===b.readi?'selected':''}>${l}</option>`).join('')}</select></td>
+       <td><select class="edt" data-bteam="${idx}">${['All'].concat(TEAMLIST).map(t=>`<option ${t===b.team?'selected':''}>${t}</option>`).join('')}</select></td>
+       <td><input class="edt" data-bf="name" data-bi="${idx}" value="${(b.name||'').replace(/"/g,'&quot;')}"></td>
+       <td><textarea class="edt" data-bf="pv" data-bi="${idx}" rows="2">${b.pv||''}</textarea></td>
+       <td><textarea class="edt" data-bf="sm" data-bi="${idx}" rows="2">${b.sm||''}</textarea></td>
+       <td><input class="edt" data-bf="ef" data-bi="${idx}" value="${b.ef||''}" style="width:50px"></td>
+       <td><input class="edt" data-bf="st" data-bi="${idx}" value="${b.st||''}" style="width:74px"></td>
+       <td><input class="edt" data-bf="dri" data-bi="${idx}" value="${b.dri||''}"></td>
+       <td><input class="edt" data-bf="na" data-bi="${idx}" value="${b.na||''}"></td>
+       <td><div class="actcell"><button class="iconbtn" data-brm="${idx}">✕</button></div></td></tr>`;
+    }
+    return `<tr class="rrow"><td><span class="readi ${b.readi}">${b.rl}</span></td>
+     <td><span class="team" style="background:${teamColor[b.team]}">${b.team}</span></td>
+     <td><span class="iname" style="font-size:12px">${b.name}</span></td>
+     <td class="small">${b.pv||''}</td><td class="small">${b.sm||''}</td>
+     <td><span class="readi parked">${b.ef||''}</span></td><td class="small">${b.st||''}</td><td class="small">${b.dri||''}</td>
+     <td class="small">${b.na||''}</td><td></td></tr>`;
+  }).join('')||'<tr><td colspan="10" class="small" style="padding:16px">No backlog items for this team.</td></tr>';
+  document.getElementById('nv-back').textContent=back().length+' items';
+  if(editMode){
+    document.querySelectorAll('[data-bf]').forEach(el=>el.onchange=()=>{back()[+el.dataset.bi][el.dataset.bf]=el.value;});
+    document.querySelectorAll('[data-brd]').forEach(s=>s.onchange=()=>{const b=back()[+s.dataset.brd];b.readi=s.value;b.rl=READI.find(r=>r[0]===s.value)[1];renderAll();});
+    document.querySelectorAll('[data-bteam]').forEach(s=>s.onchange=()=>{back()[+s.dataset.bteam].team=s.value;renderRoad();});
+    document.querySelectorAll('[data-brm]').forEach(b=>b.onclick=()=>{back().splice(+b.dataset.brm,1);renderAll();});
+  }
+}
+
+/* ===== access ===== */
+function renderPeople(){
+  const admin=isAdmin();
+  document.querySelector('#peopleTable tbody').innerHTML=people.map((p,i)=>{
+    const roleCtl=admin?`<select class="edt" data-prole="${i}">${['Admin','Editor','Viewer'].map(r=>`<option ${r===p.role?'selected':''}>${r}</option>`).join('')}</select>`:`<span class="roletag ${p.role}">${p.role}</span>`;
+    const scopeCtl=admin?`<select class="edt" data-pscope="${i}" ${p.role==='Viewer'?'disabled':''}>${['All'].concat(TEAMLIST).map(t=>`<option ${t===p.scope?'selected':''}>${t}</option>`).join('')}</select>`:p.scope;
+    const manage=admin&&p.name!=='Sara M'?`<button class="revoke" data-revoke="${i}">Revoke</button>`:'<span class="small">—</span>';
+    return `<tr><td><b>${p.name}</b></td><td>${roleCtl}</td><td>${scopeCtl}</td><td><div class="actcell" style="display:flex">${manage}</div></td></tr>`;
+  }).join('');
+  if(admin){
+    document.querySelectorAll('[data-prole]').forEach(s=>s.onchange=()=>{const p=people[+s.dataset.prole];p.role=s.value;if(s.value==='Viewer')p.scope='All';renderPeople();syncWho();log('changed '+p.name+' to '+s.value);});
+    document.querySelectorAll('[data-pscope]').forEach(s=>s.onchange=()=>{people[+s.dataset.pscope].scope=s.value;});
+    document.querySelectorAll('[data-revoke]').forEach(b=>b.onclick=()=>{const p=people[+b.dataset.revoke];p.role='Viewer';p.scope='All';renderPeople();syncWho();refreshGate();log('revoked '+p.name+' to view-only');});
+  }
+}
+document.getElementById('addPerson').onclick=()=>{const n=prompt('Name:');if(!n)return;people.push({name:n,role:'Viewer',scope:'All'});renderPeople();syncWho();log('added '+n+' as viewer');};
+document.getElementById('revokeAll').onclick=()=>{if(!isAdmin()){alert('Only an admin can do this.');return;}if(!confirm('Set everyone except Sara to view-only?'))return;people.forEach(p=>{if(p.name!=='Sara M'){p.role='Viewer';p.scope='All';}});renderPeople();syncWho();refreshGate();log('revoked all to view-only');};
+function renderLog(){document.getElementById('logList').innerHTML=logs.map(([w,t,wh])=>`<div class="logrow"><span class="who">${w}</span><span>${t}</span><span class="when">${wh}</span></div>`).join('');}
+
+/* ===== header controls ===== */
+function syncWho(){const sel=document.getElementById('who');sel.innerHTML=people.map(p=>`<option value="${p.name}" ${p.name===me?'selected':''}>${p.name} · ${p.role}</option>`).join('');if(!people.find(p=>p.name===me))me=people[0].name;}
+document.getElementById('who').onchange=e=>{me=e.target.value;editMode=false;refreshGate();renderAll();};
+document.getElementById('qtr').onchange=e=>{CUR=e.target.value;const[txt,cls]=QSTATE[CUR];const qs=document.getElementById('qstate');qs.textContent=txt;qs.className='qstate '+cls;editMode=false;refreshGate();renderAll();};
+document.getElementById('editToggle').onclick=function(){if(!canEditAnything())return;editMode=!editMode;this.classList.toggle('on',editMode);this.innerHTML=editMode?'<span>●</span> Editing':'<span>✎</span> Edit';document.body.dataset.edit=editMode?'true':'false';renderAll();};
+
+const titles={exec:['Executive dashboard','Auto-calculated rollups for leadership. Top priorities are yours to edit.'],
+ roadmap:['Roadmap','Drag an initiative across the line to commit or defer it. Capacity recomputes live.'],
+ capacity:['Capacity & staffing','Assign engineers to initiatives. HC rolls up automatically from every percentage.'],
+ lending:['Lending flows','Lend any engineer to another team. Loans are derived from assignments.'],
+ backlog:['Backlog','Groomed by readiness. Ready items show below the line on the roadmap.'],
+ access:['Access & audit','View is the default. Grant, scope and revoke edit access. Full change history below.']};
+document.querySelectorAll('.nav').forEach(n=>n.onclick=()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));n.classList.add('active');const v=n.dataset.v;document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('v-'+v).classList.add('active');document.getElementById('vtitle').textContent=titles[v][0];document.getElementById('vsub').textContent=titles[v][1];});
+function buildChips(host,onPick){const h=document.getElementById(host);TEAMLIST.forEach(t=>{const c=document.createElement('div');c.className='chip';c.textContent=t;c.onclick=()=>{h.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');onPick(t);};h.appendChild(c);});h.querySelector('.chip').onclick=function(){h.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));this.classList.add('on');onPick('all');};}
+buildChips('chipsRoad',t=>{activeRoad=t;applyRoad();});
+buildChips('chipsBack',t=>{activeBack=t;renderBacklog();});
+
+function renderAll(){refreshGate();renderExec();renderRoad();renderCap();renderLending();renderBacklog();renderPeople();renderLog();}
+syncWho();renderAll();
+</script>
