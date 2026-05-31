@@ -216,7 +216,7 @@ async function seed() {
   // Q2 assignments  [personName, initiativeId, pct]
   const q2Asg: Array<[string, string, number]> = [
     ["Zhixin Wen","ktlo",0.2],["Trung Dinh","ktlo",0.2],["Stephen Ma","ktlo",0.2],["Meng Xu","ktlo",0.2],["Michael Krishnan","ktlo",0.2],
-    ["Yingjie He","ktlo",0.1],["Bing Yang","ktlo",0.1],["Shichao Jin","ktlo",0.1],
+    ["Yingjie He","ktlo",0.1],["Shichao Jin","ktlo",0.1],
     ["Austen Schunk","ktlo",0.2],["Cory Zhao","ktlo",0.2],["Nathan Zhang","ktlo",0.3],["Zhengyin Qian","ktlo",0.2],["Shiming Song","ktlo",0.2],["Jin Wang","ktlo",0.3],["Zijian Xie","ktlo",0.3],
     ["Sen Li","ktlo",0.5],["Anders Persson","ktlo",0.2],["Vineesha Kasireddy","ktlo",0.2],["Utkarsh Singh","ktlo",0.2],["Pranish Pantha","ktlo",0.4],
     ["Peter Yao","ktlo",0.5],["Julian Kudszus","ktlo",1.0],
@@ -236,7 +236,7 @@ async function seed() {
     ["Julien Mo","ssh",0.8],["Manav Kapoor","ssh",0.2],["Jose Manjarrez","ssh",0.2],
     ["Anders Persson","raasstd",0.8],["Utkarsh Singh","raasstd",0.8],["Vineesha Kasireddy","raasstd",0.8],["Pranish Pantha","raasstd",0.2],
     ["Jose Manjarrez","crdbrel",0.7],["Manav Kapoor","crdbrel",0.7],["Steven Wang","crdbrel",0.5],["Qinghua Chen","crdbrel",0.5],["Gavin Wang","crdbrel",0.8],
-    ["Bing Yang","pgint",0.9],["Zijian Xie","pgint",0.5],
+    ["Zijian Xie","pgint",0.5],
     ["Yingjie He","vsearch",0.9],["Shichao Jin","vsearch",0.2],
     ["Huizhi Lu","qaascreator",1.0],
     ["Ankur Kulshrestha","r3dr",0.8],
@@ -289,7 +289,7 @@ async function seed() {
   // Q3 assignments
   const q3Asg: Array<[string, string, number]> = [
     ["Zhixin Wen","k3ktlo",0.2],["Trung Dinh","k3ktlo",0.2],["Stephen Ma","k3ktlo",0.2],["Meng Xu","k3ktlo",0.2],
-    ["Yingjie He","k3ktlo",0.1],["Bing Yang","k3ktlo",0.2],["Shichao Jin","k3ktlo",0.2],
+    ["Yingjie He","k3ktlo",0.1],["Shichao Jin","k3ktlo",0.2],
     ["Austen Schunk","k3ktlo",0.2],["Cory Zhao","k3ktlo",0.2],["Nathan Zhang","k3ktlo",0.3],["Shiming Song","k3ktlo",0.2],["Jin Wang","k3ktlo",0.3],
     ["Sen Li","k3ktlo",0.5],["Anders Persson","k3ktlo",0.2],["Utkarsh Singh","k3ktlo",0.2],["Pranish Pantha","k3ktlo",0.4],
     ["Peter Yao","k3ktlo",0.5],["Julian Kudszus","k3ktlo",1.0],
@@ -304,7 +304,7 @@ async function seed() {
     ["Pranish Pantha","k3secrets",0.4],["Leo Luo","k3secrets",0.5],["Ravi Gullapalli","k3secrets",0.5],["George Li","k3secrets",0.6],["Qinghua Chen","k3secrets",0.5],
     ["Julien Mo","k3ssh",0.6],["Manav Kapoor","k3ssh",0.3],["Danny Avhad","k3ssh",0.3],
     ["Jose Manjarrez","k3crdb",0.6],["Manav Kapoor","k3crdb",0.5],["Steven Wang","k3crdb",0.5],["Gavin Wang","k3crdb",0.6],
-    ["Bing Yang","k3pg",0.7],["Zijian Xie","k3pg",0.5],["Shichao Jin","k3pg",0.4],
+    ["Zijian Xie","k3pg",0.5],["Shichao Jin","k3pg",0.4],
     ["Huizhi Lu","k3qaas",1.0],["Peter Yao","k3qaas",0.5],
     ["Anders Persson","k3raas",0.8],["Utkarsh Singh","k3raas",0.8],["Vineesha Kasireddy","k3raas",0.8],
   ];

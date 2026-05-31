@@ -27,8 +27,8 @@ const FIXTURE_PEOPLE: OrgPerson[] = [
   { rosId: "ros_haocheng_zuo",     name: "Haocheng Zuo",       email: "haocheng.zuo@roblox.com",       role: "IC",      homeTeam: "RDB-KV",  managerRosId: "ros_dikang_gu",         active: true },
 
   // ── RDB-PG ───────────────────────────────────────────────────────────────
-  { rosId: "ros_yingjie_he",       name: "Yingjie He",         email: "yingjie.he@roblox.com",         role: "Manager", homeTeam: "RDB-PG",  managerRosId: "ros_yawei_li",          active: true },
-  { rosId: "ros_bing_yang",        name: "Bing Yang",          email: "bing.yang@roblox.com",          role: "IC",      homeTeam: "RDB-PG",  managerRosId: "ros_yingjie_he",        active: true },
+  { rosId: "ros_yingjie_he",       name: "Yingjie He",         email: "yingjie.he@roblox.com",         role: "IC",      homeTeam: "RDB-PG",  managerRosId: "ros_yawei_li",          active: true },
+  { rosId: "ros_bing_yang",        name: "Bing Yang",          email: "bing.yang@roblox.com",          role: "IC",      homeTeam: "RDB-PG",  managerRosId: "ros_yingjie_he",        active: false },
   { rosId: "ros_shichao_jin",      name: "Shichao Jin",        email: "shichao.jin@roblox.com",        role: "IC",      homeTeam: "RDB-PG",  managerRosId: "ros_yingjie_he",        active: true },
   { rosId: "ros_steven_wang",      name: "Steven Wang",        email: "steven.wang@roblox.com",        role: "IC",      homeTeam: "MS SQL",  managerRosId: "ros_gopal_anand",       active: true },
 
