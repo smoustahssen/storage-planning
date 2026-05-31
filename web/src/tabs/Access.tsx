@@ -10,15 +10,14 @@ interface Props {
 const TEAMS = ["RDB-KV", "RDB-PG", "EaaS", "RaaS", "QaaS", "R3", "SIM", "MS SQL", "All"];
 
 function timeAgo(ts: string): string {
-  const diff = Date.now() - new Date(ts + "Z").getTime();
+  const date = new Date(ts + "Z");
+  const diff = Date.now() - date.getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1)  return "just now";
-  if (m < 60) return `${m}m ago`;
+  if (m < 1)   return "just now";
+  if (m < 60)  return `${m}m ago`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  if (d < 7)  return `${d}d ago`;
-  return new Date(ts + "Z").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (h < 12)  return `${h}h ago`;
+  return date.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

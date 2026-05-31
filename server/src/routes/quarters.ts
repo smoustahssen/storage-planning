@@ -209,7 +209,10 @@ export async function quarterRoutes(app: FastifyInstance) {
     "/api/quarters/:q/audit",
     async (req, reply) => {
       // Filter by entity references to this quarter
-      const rows = db.all(
+      const rows = db.all<{
+        id: string; ts: string; actor_ros_id: string; actor_name: string | null;
+        action: string; entity: string; detail: string;
+      }>(
         sql.raw(`
           SELECT al.*, p.name as actor_name
           FROM audit_log al
@@ -219,7 +222,17 @@ export async function quarterRoutes(app: FastifyInstance) {
           LIMIT 500
         `),
       );
-      return { entries: rows };
+      return {
+        entries: rows.map((r) => ({
+          id: r.id,
+          ts: r.ts,
+          actorRosId: r.actor_ros_id,
+          actorName: r.actor_name ?? r.actor_ros_id,
+          action: r.action,
+          entity: r.entity,
+          detail: r.detail,
+        })),
+      };
     },
   );
 }
