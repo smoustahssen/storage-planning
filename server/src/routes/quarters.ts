@@ -45,9 +45,18 @@ export async function quarterRoutes(app: FastifyInstance) {
         sql.raw(`SELECT * FROM initiative WHERE quarter_id = '${q}' ORDER BY status, pri NULLS LAST, name`),
       );
 
-      const assignments = db.all<Record<string, unknown>>(
-        sql.raw(`SELECT a.*, p.name as person_name, p.home_team FROM assignment a JOIN person p ON p.ros_id = a.ros_id WHERE a.quarter_id = '${q}'`),
+      const assignmentsRaw = db.all<Record<string, unknown>>(
+        sql.raw(`SELECT a.id, a.quarter_id, a.ros_id, a.initiative_id, a.pct, p.name as person_name, p.home_team FROM assignment a JOIN person p ON p.ros_id = a.ros_id WHERE a.quarter_id = '${q}'`),
       );
+      const assignments = assignmentsRaw.map((a) => ({
+        id:           a.id,
+        quarterId:    a.quarter_id,
+        rosId:        a.ros_id,
+        initiativeId: a.initiative_id,
+        pct:          a.pct,
+        personName:   a.person_name,
+        homeTeam:     a.home_team,
+      }));
 
       const priorities = db.all(
         sql.raw(`SELECT rank, heading, body FROM priority WHERE quarter_id = '${q}' ORDER BY rank`),
