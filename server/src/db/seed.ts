@@ -155,6 +155,7 @@ async function seed() {
     { id: "pgfound",     team: "RDB-PG", name: "RDB-PG Engine Foundation: Logical B&R + PITR + Cell HA", theme: "Reliability", pri: "P1", deliverables: "Logical backup & restore, point-in-time recovery, and cell HA for RDB-PG.", metrics: "B&R validated; PITR RPO ≤1h; Cell HA drill passing" },
     { id: "r3features",  team: "R3",     name: "R3 Feature Support for Asset Migration",                 theme: "Cust Exp",    pri: "P1", deliverables: "R3 features required to unblock asset pipeline migration use cases.", metrics: "Asset migration unblocked on R3; ≥1 use case live" },
     { id: "evmigration", team: "MS SQL", name: "EV1 / MSSQL → EaaS Large Table Migration",              theme: "Efficiency",  pri: "P1", deliverables: "Data-path tooling to migrate large EV1 and MS SQL tables onto EaaS.", metrics: "≥1 large table migrated to EaaS; migration runbook published" },
+    { id: "mssqlpatch",  team: "MS SQL", name: "MSSQL Patching Automation",                             theme: "Security",    pri: "P1", deliverables: "Automated patching pipeline for MS SQL fleet. Break-glass access documented.", metrics: "100% MS SQL servers patched via automation" },
   ];
   for (const i of q2Initiatives) insertInitiative({ ...i, quarterId: Q2, status: "committed" });
 
@@ -178,14 +179,14 @@ async function seed() {
     ["Peter Yao","ktlo",0.5],["Julian Kudszus","ktlo",1.0],
     ["Weiji Hu","ktlo",0.2],["Leon Gao","ktlo",0.2],["Leo Luo","ktlo",0.2],["Ankur Kulshrestha","ktlo",0.2],["Derek Pham","ktlo",0.2],["Julien Mo","ktlo",0.2],["Yue Luo","ktlo",0.2],
     ["Will Hodges","ktlo",0.2],["Shenglin Du","ktlo",0.2],["Fred Liu","ktlo",0.2],["Gavin Wang","ktlo",0.2],["Hieu Pham","ktlo",0.2],["George Li","ktlo",0.2],["Jose Manjarrez","ktlo",0.2],
-    ["Rahul Yadav","ktlo",1.0],["Danny Avhad","ktlo",0.2],["Ravi Gullapalli","ktlo",0.2],["Gopal Anand","ktlo",0.2],
+    ["Rahul Yadav","ktlo",1.0],["Ravi Gullapalli","ktlo",0.2],["Gopal Anand","ktlo",0.2],
     ["Zhixin Wen","creator",0.5],["Will Hodges","creator",0.8],["Stephen Ma","creator",0.8],["Trung Dinh","creator",0.3],
     ["Meng Xu","cell",0.8],["Michael Krishnan","cell",0.8],["Shenglin Du","cell",0.8],["Austen Schunk","cell",0.8],["Hieu Pham","cell",0.8],["Haocheng Zuo","cell",0.5],["Zhixin Wen","cell",0.3],
     ["Trung Dinh","flow",0.5],["Cory Zhao","flow",0.6],["Zhengyin Qian","flow",0.8],["Nathan Zhang","flow",0.2],
     ["Shiming Song","staging",0.6],["Jin Wang","staging",0.7],["Weiji Hu","staging",0.8],["Fred Liu","staging",0.8],
     ["Nathan Zhang","cacherust",0.5],["Cory Zhao","cacherust",0.2],
-    ["Pranish Pantha","secrets",0.4],["Leo Luo","secrets",0.8],["Peter Yao","secrets",0.5],["Ravi Gullapalli","secrets",0.8],["George Li","secrets",0.8],["Qinghua Chen","secrets",0.5],["Steven Wang","secrets",0.5],
-    ["Julien Mo","ssh",0.8],["Manav Kapoor","ssh",0.2],["Jose Manjarrez","ssh",0.2],["Danny Avhad","ssh",0.6],
+    ["Pranish Pantha","secrets",0.4],["Leo Luo","secrets",0.8],["Peter Yao","secrets",0.5],["Ravi Gullapalli","secrets",0.8],["George Li","secrets",0.8],["Qinghua Chen","secrets",0.5],
+    ["Julien Mo","ssh",0.8],["Manav Kapoor","ssh",0.2],["Jose Manjarrez","ssh",0.2],
     ["Anders Persson","raasstd",0.8],["Utkarsh Singh","raasstd",0.8],["Vineesha Kasireddy","raasstd",0.8],["Pranish Pantha","raasstd",0.2],
     ["Jose Manjarrez","crdbrel",0.7],["Manav Kapoor","crdbrel",0.7],["Steven Wang","crdbrel",0.5],["Qinghua Chen","crdbrel",0.5],["Gavin Wang","crdbrel",0.8],
     ["Bing Yang","pgint",0.9],["Zijian Xie","pgint",0.5],
@@ -193,8 +194,9 @@ async function seed() {
     ["Huizhi Lu","qaascreator",1.0],
     ["Ankur Kulshrestha","r3dr",0.8],
     ["Leon Gao","r3ec",0.8],
-    ["Vikash Singh","pgfound",1.0],["Haocheng Zuo","pgfound",0.5],
+    ["Vikash Singh","pgfound",1.0],["Haocheng Zuo","pgfound",0.5],["Shichao Jin","pgfound",0.7],["Steven Wang","pgfound",0.5],
     ["Derek Pham","r3features",0.8],
+    ["Danny Avhad","mssqlpatch",1.0],
   ];
   for (const [name, initId, pct] of q2Asg) insertAssignment(Q2, name, initId, pct);
 
