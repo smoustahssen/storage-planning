@@ -34,8 +34,8 @@ export async function assignmentRoutes(app: FastifyInstance) {
       return reply.status(403).send({ error: "Quarter is locked" });
     }
 
-    const initiative = db.get<{ team: string }>(
-      sql.raw(`SELECT team FROM initiative WHERE id = '${initiativeId}'`),
+    const initiative = db.get<{ team: string; name: string }>(
+      sql.raw(`SELECT team, name FROM initiative WHERE id = '${initiativeId}'`),
     );
     if (!initiative) return reply.status(404).send({ error: "Initiative not found" });
 
@@ -51,6 +51,8 @@ export async function assignmentRoutes(app: FastifyInstance) {
       });
     }
 
+    const personRec = db.get<{ name: string }>(sql.raw(`SELECT name FROM person WHERE ros_id = '${rosId}'`));
+
     // Upsert on the unique (quarter, person, initiative) key
     const existing = db.get<{ id: string }>(
       sql.raw(
@@ -65,7 +67,8 @@ export async function assignmentRoutes(app: FastifyInstance) {
         sql.raw(`UPDATE assignment SET pct = ${pct} WHERE id = '${existing.id}'`),
       );
       audit(user.rosId, "assignment.update", existing.id, {
-        quarterId, rosId, initiativeId, pct,
+        quarterId, rosId, personName: personRec?.name ?? rosId,
+        initiativeId, initiativeName: initiative.name, pct,
       });
     } else {
       assignmentId = uuidv4();
@@ -74,7 +77,8 @@ export async function assignmentRoutes(app: FastifyInstance) {
         VALUES ('${assignmentId}', '${quarterId}', '${rosId}', '${initiativeId}', ${pct})
       `));
       audit(user.rosId, "assignment.create", assignmentId, {
-        quarterId, rosId, initiativeId, pct,
+        quarterId, rosId, personName: personRec?.name ?? rosId,
+        initiativeId, initiativeName: initiative.name, pct,
       });
     }
 
@@ -107,15 +111,20 @@ export async function assignmentRoutes(app: FastifyInstance) {
         return reply.status(403).send({ error: "Quarter is locked" });
       }
 
-      const initiative = db.get<{ team: string }>(
-        sql.raw(`SELECT team FROM initiative WHERE id = '${existing.initiative_id}'`),
+      const initiative = db.get<{ team: string; name: string }>(
+        sql.raw(`SELECT team, name FROM initiative WHERE id = '${existing.initiative_id}'`),
       );
       if (!canWriteTeam(user, initiative?.team ?? "")) {
         return reply.status(403).send({ error: "Outside your team scope" });
       }
 
+      const personRec = db.get<{ name: string }>(sql.raw(`SELECT name FROM person WHERE ros_id = '${existing.ros_id}'`));
       db.run(sql.raw(`UPDATE assignment SET pct = ${pct} WHERE id = '${id}'`));
-      audit(user.rosId, "assignment.update", id, { pct });
+      audit(user.rosId, "assignment.update", id, {
+        pct,
+        personName: personRec?.name ?? existing.ros_id,
+        initiativeName: initiative?.name ?? existing.initiative_id,
+      });
       bumpQuarterVersion(existing.quarter_id);
       return { ok: true };
     },
@@ -131,7 +140,8 @@ export async function assignmentRoutes(app: FastifyInstance) {
       const existing = db.get<{
         quarter_id: string;
         initiative_id: string;
-      }>(sql.raw(`SELECT quarter_id, initiative_id FROM assignment WHERE id = '${id}'`));
+        ros_id: string;
+      }>(sql.raw(`SELECT quarter_id, initiative_id, ros_id FROM assignment WHERE id = '${id}'`));
       if (!existing) return reply.status(404).send({ error: "Assignment not found" });
 
       const quarter = getQuarter(existing.quarter_id);
@@ -140,15 +150,20 @@ export async function assignmentRoutes(app: FastifyInstance) {
         return reply.status(403).send({ error: "Quarter is locked" });
       }
 
-      const initiative = db.get<{ team: string }>(
-        sql.raw(`SELECT team FROM initiative WHERE id = '${existing.initiative_id}'`),
+      const initiative = db.get<{ team: string; name: string }>(
+        sql.raw(`SELECT team, name FROM initiative WHERE id = '${existing.initiative_id}'`),
       );
       if (!canWriteTeam(user, initiative?.team ?? "")) {
         return reply.status(403).send({ error: "Outside your team scope" });
       }
 
+      const personRec = db.get<{ name: string }>(sql.raw(`SELECT name FROM person WHERE ros_id = '${existing.ros_id}'`));
       db.run(sql.raw(`DELETE FROM assignment WHERE id = '${id}'`));
-      audit(user.rosId, "assignment.delete", id, { quarterId: existing.quarter_id });
+      audit(user.rosId, "assignment.delete", id, {
+        quarterId: existing.quarter_id,
+        personName: personRec?.name ?? existing.ros_id,
+        initiativeName: initiative?.name ?? existing.initiative_id,
+      });
       bumpQuarterVersion(existing.quarter_id);
       return { ok: true };
     },

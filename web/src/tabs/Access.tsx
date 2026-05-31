@@ -9,6 +9,48 @@ interface Props {
 
 const TEAMS = ["RDB-KV", "RDB-PG", "EaaS", "RaaS", "QaaS", "R3", "SIM", "MS SQL", "All"];
 
+function timeAgo(ts: string): string {
+  const diff = Date.now() - new Date(ts + "Z").getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1)  return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 7)  return `${d}d ago`;
+  return new Date(ts + "Z").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function describeEntry(action: string, d: any): string {
+  switch (action) {
+    case "initiative.create":
+      return `Created "${d.name}" in ${d.team} · ${d.theme}${d.pri ? ` · ${d.pri}` : ""}`;
+    case "initiative.delete":
+      return d.name ? `Deleted "${d.name}" (${d.team})` : "Deleted an initiative";
+    case "initiative.patch": {
+      const fields = Object.keys(d).filter((k) => k !== "quarterId");
+      return fields.length ? `Updated initiative — changed ${fields.join(", ")}` : "Updated an initiative";
+    }
+    case "assignment.create":
+      return `Assigned ${d.personName ?? d.rosId} to "${d.initiativeName ?? d.initiativeId}" — ${Math.round((d.pct ?? 0) * 100)}%`;
+    case "assignment.update":
+      return `Updated ${d.personName ?? d.rosId ?? "someone"}'s allocation on "${d.initiativeName ?? d.initiativeId ?? "an initiative"}" → ${Math.round((d.pct ?? 0) * 100)}%`;
+    case "assignment.delete":
+      return d.personName && d.initiativeName
+        ? `Removed ${d.personName} from "${d.initiativeName}"`
+        : "Removed an assignment";
+    case "quarter.patch":
+      if (d.locked === 1 || d.locked === true)  return "Locked the quarter";
+      if (d.locked === 0 || d.locked === false) return "Unlocked the quarter";
+      return "Updated quarter settings";
+    case "priorities.set":
+      return `Updated priorities (${d.count} item${d.count === 1 ? "" : "s"})`;
+    default:
+      return action;
+  }
+}
+
 const MATRIX_ROWS = [
   ["View all tabs",                     "✓",             "✓ (own team)",   "✓"],
   ["Create/edit/delete initiatives",    "✓",             "✓ (own team)",   "—"],
@@ -217,20 +259,17 @@ export function Access({ quarterId, me }: Props) {
           <div style={{ padding: "24px 18px", color: "var(--muted)", fontSize: 12 }}>No changes recorded yet</div>
         ) : (
           <div>
-            {audit.map((entry) => (
-              <div key={entry.id} className="logrow">
-                <span className="who">{entry.actorName ?? entry.actorRosId}</span>
-                <span style={{ flex: 1 }}>
-                  <b>{entry.action}</b>{" "}{entry.entity}
-                  {entry.detail && (
-                    <span style={{ color: "var(--muted)" }}>
-                      {" — "}{typeof entry.detail === "string" ? entry.detail.slice(0, 100) : JSON.stringify(entry.detail).slice(0, 100)}
-                    </span>
-                  )}
-                </span>
-                <span className="when">{new Date(entry.ts).toLocaleString()}</span>
-              </div>
-            ))}
+            {audit.map((entry) => {
+              const d = (() => { try { return JSON.parse(entry.detail); } catch { return {}; } })();
+              const desc = describeEntry(entry.action, d);
+              return (
+                <div key={entry.id} className="logrow">
+                  <span className="who">{entry.actorName ?? entry.actorRosId}</span>
+                  <span style={{ flex: 1 }}>{desc}</span>
+                  <span className="when" title={new Date(entry.ts).toLocaleString()}>{timeAgo(entry.ts)}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

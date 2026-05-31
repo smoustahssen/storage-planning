@@ -151,8 +151,8 @@ export async function initiativeRoutes(app: FastifyInstance) {
       const { id } = req.params;
       const user = req.user;
 
-      const existing = db.get<{ quarter_id: string; team: string }>(
-        sql.raw(`SELECT quarter_id, team FROM initiative WHERE id = '${id}'`),
+      const existing = db.get<{ quarter_id: string; team: string; name: string }>(
+        sql.raw(`SELECT quarter_id, team, name FROM initiative WHERE id = '${id}'`),
       );
       if (!existing) return reply.status(404).send({ error: "Not found" });
 
@@ -168,7 +168,7 @@ export async function initiativeRoutes(app: FastifyInstance) {
 
       // CASCADE deletes assignments
       db.run(sql.raw(`DELETE FROM initiative WHERE id = '${id}'`));
-      audit(user.rosId, "initiative.delete", id, { quarterId: existing.quarter_id });
+      audit(user.rosId, "initiative.delete", id, { quarterId: existing.quarter_id, name: existing.name, team: existing.team });
       bumpQuarterVersion(existing.quarter_id);
       return { ok: true };
     },
