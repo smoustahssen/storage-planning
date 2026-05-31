@@ -113,8 +113,8 @@ async function seed() {
   // ── Availability overrides ─────────────────────────────────────────────
   // Sen Li: manager of RaaS who carries 0.5 IC load
   db.run(sql.raw(`INSERT OR REPLACE INTO availability_override(ros_id, availability) VALUES ('ros_sen_li', 0.5)`));
-  // Zijian Xie: 0.8 availability
-  db.run(sql.raw(`INSERT OR REPLACE INTO availability_override(ros_id, availability) VALUES ('ros_zijian_xie', 0.8)`));
+  // Zijian Xie: 0.7 availability (30% leave)
+  db.run(sql.raw(`INSERT OR REPLACE INTO availability_override(ros_id, availability) VALUES ('ros_zijian_xie', 0.7)`));
 
   // ── Quarters ───────────────────────────────────────────────────────────
   const quarters = [

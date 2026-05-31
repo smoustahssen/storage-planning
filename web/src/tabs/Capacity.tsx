@@ -134,6 +134,7 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
           <table>
             <thead>
               <tr>
+                <th className="num" style={{ width: 32 }}>#</th>
                 <th>Engineer</th>
                 <th>Team</th>
                 <th>Projects</th>
@@ -142,12 +143,13 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
               </tr>
             </thead>
             <tbody>
-              {derived.engineers.map((eng) => {
+              {derived.engineers.map((eng, idx) => {
                 const over    = eng.balance === "over";
                 const under   = eng.balance === "under";
                 const visible = canSeeEngineers(me, eng.homeTeam);
                 return (
                   <tr key={eng.rosId} className="rrow">
+                    <td className="num" style={{ color: "var(--muted)", fontSize: 11 }}>{idx + 1}</td>
                     <td style={{ fontWeight: 500 }}>
                       {visible
                         ? <><span className={`dot ${eng.balance === "balanced" ? "bal" : eng.balance === "over" ? "over" : "under"}`} />{eng.name}</>
@@ -209,7 +211,7 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
               })}
               {derived.engineers.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ padding: 32, textAlign: "center", color: "var(--muted)" }}>
+                  <td colSpan={6} style={{ padding: 32, textAlign: "center", color: "var(--muted)" }}>
                     No engineers with availability &gt; 0
                   </td>
                 </tr>
