@@ -189,7 +189,7 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
                       </td>
                     )}
                     <td>
-                      {canEdit && me.role === "admin" ? (
+                      {me.role === "admin" ? (
                         <select
                           value={eng.homeTeam}
                           onChange={(e) => handleSetHomeTeam(eng.rosId, e.target.value)}
