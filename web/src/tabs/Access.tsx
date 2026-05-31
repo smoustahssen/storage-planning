@@ -28,8 +28,12 @@ function describeEntry(action: string, d: any): string {
     case "initiative.delete":
       return d.name ? `Deleted "${d.name}" (${d.team})` : "Deleted an initiative";
     case "initiative.patch": {
-      const fields = Object.keys(d).filter((k) => k !== "quarterId");
-      return fields.length ? `Updated initiative — changed ${fields.join(", ")}` : "Updated an initiative";
+      const label = d._name ? `"${d._name}"` : "an initiative";
+      const fields = Object.keys(d).filter((k) => !k.startsWith("_"));
+      if (fields.length === 1 && fields[0] === "status") {
+        return d.status === "committed" ? `Committed ${label}` : `Deferred ${label} to backlog`;
+      }
+      return fields.length ? `Updated ${label} — changed ${fields.join(", ")}` : `Updated ${label}`;
     }
     case "assignment.create":
       return `Assigned ${d.personName ?? d.rosId} to "${d.initiativeName ?? d.initiativeId}" — ${Math.round((d.pct ?? 0) * 100)}%`;

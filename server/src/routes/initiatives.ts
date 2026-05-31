@@ -94,8 +94,8 @@ export async function initiativeRoutes(app: FastifyInstance) {
       const user = req.user;
       const body = req.body;
 
-      const existing = db.get<{ quarter_id: string; team: string; theme: string; status: string }>(
-        sql.raw(`SELECT quarter_id, team, theme, status FROM initiative WHERE id = '${id}'`),
+      const existing = db.get<{ quarter_id: string; team: string; theme: string; status: string; name: string }>(
+        sql.raw(`SELECT quarter_id, team, theme, status, name FROM initiative WHERE id = '${id}'`),
       );
       if (!existing) return reply.status(404).send({ error: "Initiative not found" });
 
@@ -138,7 +138,7 @@ export async function initiativeRoutes(app: FastifyInstance) {
       if (!sets.length) return reply.status(400).send({ error: "Nothing to update" });
 
       db.run(sql.raw(`UPDATE initiative SET ${sets.join(", ")} WHERE id = '${id}'`));
-      audit(user.rosId, "initiative.patch", id, body);
+      audit(user.rosId, "initiative.patch", id, { _name: existing.name, _team: existing.team, ...body });
       bumpQuarterVersion(existing.quarter_id);
       return { ok: true };
     },
