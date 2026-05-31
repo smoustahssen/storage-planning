@@ -25,7 +25,7 @@ export function Lending({ plan, me, onReload, editMode }: Props) {
   const [lendPct, setLendPct]     = useState("0.5");
   const [lendError, setLendError] = useState<string | null>(null);
 
-  const canEdit = editMode && (me.role === "admin" || me.role === "editor") && !quarter.locked;
+  const canEdit = editMode && (me.role === "admin" || me.role === "editor");
 
   useEffect(() => {
     api.people.list().then(({ people }) => setPeople(people)).catch(console.error);
