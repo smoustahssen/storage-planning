@@ -13,6 +13,7 @@ interface Props {
   plan: PlanResponse;
   me: Me;
   onReload: () => void;
+  editMode: boolean;
 }
 
 function canEditTeam(me: Me, team: string): boolean {
@@ -21,7 +22,7 @@ function canEditTeam(me: Me, team: string): boolean {
   return false;
 }
 
-export function Roadmap({ plan, me, onReload }: Props) {
+export function Roadmap({ plan, me, onReload, editMode }: Props) {
   const [teamFilter, setTeamFilter] = useState("All");
   const [drawer, setDrawer]         = useState<Initiative | null>(null);
   const [addingNew, setAddingNew]   = useState(false);
@@ -33,7 +34,7 @@ export function Roadmap({ plan, me, onReload }: Props) {
 
   const { derived, initiatives, assignments, quarter } = plan;
   const locked  = quarter.locked;
-  const canEdit = me.role === "admin" || me.role === "editor";
+  const canEdit = editMode && (me.role === "admin" || me.role === "editor");
 
   const committed = initiatives
     .filter((i) => i.status === "committed")
@@ -277,6 +278,7 @@ export function Roadmap({ plan, me, onReload }: Props) {
           me={me}
           quarterId={plan.quarter.id}
           locked={locked}
+          editMode={editMode}
           onClose={() => setDrawer(null)}
           onSave={(patches) => handleDrawerSave(drawer, patches)}
           onDelete={() => handleDelete(drawer)}
@@ -293,15 +295,16 @@ interface DrawerInnerProps {
   me: Me;
   quarterId: string;
   locked: boolean;
+  editMode: boolean;
   onClose: () => void;
   onSave: (patches: Record<string, unknown>) => void;
   onDelete: () => void;
   onReload: () => void;
 }
 
-function InitiativeDrawer({ initiative: i, assignments, me, quarterId, locked, onClose, onSave, onDelete, onReload }: DrawerInnerProps) {
-  const canEdit      = !locked && canEditTeam(me, i.team);
-  const canEditTheme = !locked && me.role === "admin";
+function InitiativeDrawer({ initiative: i, assignments, me, quarterId, locked, editMode, onClose, onSave, onDelete, onReload }: DrawerInnerProps) {
+  const canEdit      = editMode && !locked && canEditTeam(me, i.team);
+  const canEditTheme = editMode && !locked && me.role === "admin";
 
   const [form, setForm] = useState({
     name: i.name, team: i.team, theme: i.theme,

@@ -7,6 +7,7 @@ interface Props {
   plan: PlanResponse;
   me: Me;
   onReload: () => void;
+  editMode: boolean;
 }
 
 function MiniBar({ allocated, availability }: { allocated: number; availability: number }) {
@@ -36,9 +37,9 @@ function canEditByScope(me: Me, plan: PlanResponse, teamOrInitId: string): boole
   return me.scope === teamOrInitId;
 }
 
-export function Capacity({ plan, me, onReload }: Props) {
+export function Capacity({ plan, me, onReload, editMode }: Props) {
   const { derived } = plan;
-  const canEdit = (me.role === "admin" || me.role === "editor") && !plan.quarter.locked;
+  const canEdit = editMode && (me.role === "admin" || me.role === "editor") && !plan.quarter.locked;
 
   async function handleRemoveAssignment(assignmentId: string) {
     try { await api.assignments.delete(assignmentId); onReload(); }

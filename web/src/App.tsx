@@ -243,8 +243,8 @@ export default function App() {
           ) : (
             <>
               {view === "exec"     && <Dashboard plan={plan} me={me} onReload={reload} />}
-              {view === "roadmap"  && <Roadmap   plan={plan} me={me} onReload={reload} />}
-              {view === "capacity" && <Capacity  plan={plan} me={me} onReload={reload} />}
+              {view === "roadmap"  && <Roadmap   plan={plan} me={me} onReload={reload} editMode={editMode} />}
+              {view === "capacity" && <Capacity  plan={plan} me={me} onReload={reload} editMode={editMode} />}
               {view === "lending"  && <Lending   plan={plan} me={me} onReload={reload} />}
               {view === "backlog"  && <Backlog   plan={plan} me={me} onReload={reload} />}
               {view === "access"   && <Access    quarterId={quarterId} me={me} />}
