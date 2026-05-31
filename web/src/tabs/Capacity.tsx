@@ -62,6 +62,13 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
     } catch (e) { alert(e instanceof Error ? e.message : "Failed"); }
   }
 
+  async function handleSetAvailability(rosId: string, availability: number) {
+    try {
+      await api.people.setAvailability(rosId, availability);
+      onReload();
+    } catch (e) { alert(e instanceof Error ? e.message : "Failed"); }
+  }
+
   const availableInitiatives = plan.initiatives.filter(
     (i) => i.status === "committed" &&
       (me.role === "admin" || me.scope === "All" || me.scope === i.team),
@@ -145,6 +152,7 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
               <tr>
                 <th className="num" style={{ width: 32 }}>#</th>
                 <th>Engineer</th>
+                {editMode && <th style={{ width: 130 }}>Available Bandwidth</th>}
                 <th>Team</th>
                 <th>Projects</th>
                 <th>Load</th>
@@ -164,6 +172,22 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
                         ? <><span className={`dot ${eng.balance === "balanced" ? "bal" : eng.balance === "over" ? "over" : "under"}`} />{eng.name}</>
                         : <span style={{ color: "var(--muted-2)", letterSpacing: 2 }}>••••</span>}
                     </td>
+                    {editMode && (
+                      <td>
+                        {me.role === "admin" ? (
+                          <BandwidthInput
+                            key={`${eng.rosId}-${eng.availability}`}
+                            rosId={eng.rosId}
+                            availability={eng.availability}
+                            onSave={handleSetAvailability}
+                          />
+                        ) : (
+                          <span style={{ fontSize: 12, color: "var(--muted)" }}>
+                            {(eng.availability * 100).toFixed(0)}%
+                          </span>
+                        )}
+                      </td>
+                    )}
                     <td>
                       {canEdit && me.role === "admin" ? (
                         <select
@@ -234,7 +258,7 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
               })}
               {derived.engineers.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ padding: 32, textAlign: "center", color: "var(--muted)" }}>
+                  <td colSpan={editMode ? 7 : 6} style={{ padding: 32, textAlign: "center", color: "var(--muted)" }}>
                     No engineers with availability &gt; 0
                   </td>
                 </tr>
@@ -243,6 +267,48 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+function BandwidthInput({
+  rosId,
+  availability,
+  onSave,
+}: {
+  rosId: string;
+  availability: number;
+  onSave: (rosId: string, availability: number) => void;
+}) {
+  const baseline = Math.round(availability * 100);
+  const [val, setVal] = useState(String(baseline));
+
+  function commit() {
+    const n = parseInt(val, 10);
+    if (!isNaN(n) && n >= 5 && n <= 100 && n !== baseline) {
+      onSave(rosId, n / 100);
+    } else {
+      setVal(String(baseline));
+    }
+  }
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+      <input
+        type="number"
+        value={val}
+        min={5}
+        max={100}
+        step={5}
+        onChange={(e) => setVal(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") setVal(String(baseline));
+        }}
+        style={{ width: 52, fontSize: 12, padding: "2px 4px", textAlign: "right" }}
+      />
+      <span style={{ fontSize: 12, color: "var(--muted)" }}>%</span>
     </div>
   );
 }
