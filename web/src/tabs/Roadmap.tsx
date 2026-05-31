@@ -173,8 +173,8 @@ export function Roadmap({ plan, me, onReload }: Props) {
                 <th>Theme</th>
                 <th>Deliverables</th>
                 <th>Metrics</th>
-                <th className="num" style={{ width: 64, textAlign: "center" }}>HC <span style={{ fontSize: 8, background: "var(--petrol-soft)", color: "var(--petrol)", padding: "1px 5px", borderRadius: 8, fontWeight: 600 }}>auto</span></th>
-                <th style={{ width: 120 }}>DRIs</th>
+                <th className="num">HC</th>
+                <th>DRIs</th>
                 <th className="th-act" />
               </tr>
             </thead>
@@ -192,7 +192,7 @@ export function Roadmap({ plan, me, onReload }: Props) {
                     <td><ThemeChip theme={i.theme} /></td>
                     <td><span className="small">{i.deliverables ?? "—"}</span></td>
                     <td><span className="small">{i.metrics ?? "—"}</span></td>
-                    <td className="num" style={{ textAlign: "center" }}>
+                    <td className="num">
                       <span className="hcpill">{i.hc.toFixed(1)}</span>
                     </td>
                     <td>

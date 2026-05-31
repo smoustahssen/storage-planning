@@ -425,7 +425,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 /* ── Edit mode: hide/show act cells ─────────────────────────────────────── */
 body:not([data-edit="true"]) .actcell { display: none !important; }
 body:not([data-edit="true"]) .th-act  { display: none !important; }
-body:not([data-edit="true"]) .handle  { visibility: hidden; }
+body:not([data-edit="true"]) .handle  { display: none !important; }
 .actcell { white-space: nowrap; display: flex; gap: 4px; }
 .handle { color: var(--muted-2); font-size: 13px; user-select: none; }
 
