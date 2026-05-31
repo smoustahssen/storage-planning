@@ -160,18 +160,18 @@ export function Capacity({ plan, me, onReload }: Props) {
                             <span key={p.initiativeId} className="pchip">
                               {p.name}
                               <span style={{ color: "var(--muted)", marginLeft: 2 }}>{(p.pct * 100).toFixed(0)}%</span>
-                              <button
-                                className="rm actcell"
-                                title="Remove"
-                                onClick={async () => {
-                                  const a = plan.assignments.find(
-                                    (a) => a.rosId === eng.rosId && a.initiativeId === p.initiativeId,
-                                  );
-                                  if (a && canEdit && canEditByScope(me, plan, p.initiativeId)) {
-                                    await handleRemoveAssignment(a.id);
-                                  }
-                                }}
-                              >×</button>
+                              {canEdit && canEditByScope(me, plan, p.initiativeId) && (
+                                <button
+                                  className="rm"
+                                  title="Remove"
+                                  onClick={async () => {
+                                    const a = plan.assignments.find(
+                                      (a) => a.rosId === eng.rosId && a.initiativeId === p.initiativeId,
+                                    );
+                                    if (a) await handleRemoveAssignment(a.id);
+                                  }}
+                                >×</button>
+                              )}
                             </span>
                           ))}
                           {eng.projects.length === 0 && (
