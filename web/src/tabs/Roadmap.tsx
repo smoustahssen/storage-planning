@@ -168,6 +168,7 @@ export function Roadmap({ plan, me, onReload, editMode }: Props) {
             <thead>
               <tr>
                 <th className="handle th-act" />
+                <th className="num" style={{ width: 32 }}>#</th>
                 <th>Pri</th>
                 <th>Team</th>
                 <th>Initiative</th>
@@ -180,11 +181,12 @@ export function Roadmap({ plan, me, onReload, editMode }: Props) {
               </tr>
             </thead>
             <tbody>
-              {committed.map((i) => {
+              {committed.map((i, idx) => {
                 const asg = asgsFor(i.id);
                 return (
                   <tr key={i.id} className="rrow" style={{ cursor: "pointer" }} onClick={() => setDrawer(i)}>
                     <td className="handle">⠿</td>
+                    <td className="num" style={{ color: "var(--muted)", fontSize: 11 }}>{idx + 1}</td>
                     <td>
                       {i.pri ? <span className={`pri ${i.pri}`}>{i.pri}</span> : <span className="pri def">—</span>}
                     </td>
@@ -215,7 +217,7 @@ export function Roadmap({ plan, me, onReload, editMode }: Props) {
                 );
               })}
               {committed.length === 0 && (
-                <tr><td colSpan={10} style={{ padding: 32, textAlign: "center", color: "var(--muted)" }}>No committed initiatives</td></tr>
+                <tr><td colSpan={11} style={{ padding: 32, textAlign: "center", color: "var(--muted)" }}>No committed initiatives</td></tr>
               )}
             </tbody>
           </table>
@@ -239,6 +241,7 @@ export function Roadmap({ plan, me, onReload, editMode }: Props) {
           <table>
             <thead>
               <tr>
+                <th className="num" style={{ width: 32 }}>#</th>
                 <th>Team</th>
                 <th>Initiative</th>
                 <th>Theme</th>
@@ -248,8 +251,9 @@ export function Roadmap({ plan, me, onReload, editMode }: Props) {
               </tr>
             </thead>
             <tbody>
-              {deferred.map((i) => (
+              {deferred.map((i, idx) => (
                 <tr key={i.id} className="rrow" style={{ cursor: "pointer" }} onClick={() => setDrawer(i)}>
+                  <td className="num" style={{ color: "var(--muted)", fontSize: 11 }}>{idx + 1}</td>
                   <td><TeamBadge team={i.team} /></td>
                   <td><span className="iname">{i.name}</span></td>
                   <td><ThemeChip theme={i.theme} /></td>
@@ -263,7 +267,7 @@ export function Roadmap({ plan, me, onReload, editMode }: Props) {
                 </tr>
               ))}
               {deferred.length === 0 && (
-                <tr><td colSpan={6} style={{ padding: 24, textAlign: "center", color: "var(--muted)" }}>No deferred initiatives</td></tr>
+                <tr><td colSpan={7} style={{ padding: 24, textAlign: "center", color: "var(--muted)" }}>No deferred initiatives</td></tr>
               )}
             </tbody>
           </table>

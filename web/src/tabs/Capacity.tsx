@@ -143,7 +143,7 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
               </tr>
             </thead>
             <tbody>
-              {derived.engineers.map((eng, idx) => {
+              {[...derived.engineers].sort((a, b) => a.name.localeCompare(b.name)).map((eng, idx) => {
                 const over    = eng.balance === "over";
                 const under   = eng.balance === "under";
                 const visible = canSeeEngineers(me, eng.homeTeam);
