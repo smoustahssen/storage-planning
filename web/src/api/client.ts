@@ -103,6 +103,8 @@ export const api = {
       put<{ ok: boolean }>(`/people/${rosId}/availability`, { availability }),
     clearAvailability: (rosId: string) =>
       del<{ ok: boolean }>(`/people/${rosId}/availability`),
+    setHomeTeam: (rosId: string, homeTeam: string) =>
+      put<{ ok: boolean }>(`/people/${rosId}/homeTeam`, { homeTeam }),
     search: (q: string) =>
       get<{ people: Person[] }>(`/people/search?q=${encodeURIComponent(q)}`),
   },

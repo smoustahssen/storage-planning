@@ -70,4 +70,32 @@ export async function peopleRoutes(app: FastifyInstance) {
       return { ok: true };
     },
   );
+
+  // PUT /api/people/:rosId/homeTeam  — move person to a different team
+  app.put<{ Params: { rosId: string }; Body: { homeTeam: string } }>(
+    "/api/people/:rosId/homeTeam",
+    async (req, reply) => {
+      const { rosId } = req.params;
+      const { homeTeam } = req.body;
+      const user = req.user;
+
+      if (user.role !== "admin") {
+        return reply.status(403).send({ error: "Admin only" });
+      }
+
+      const VALID_TEAMS = ["RDB-KV", "RDB-PG", "EaaS", "RaaS", "QaaS", "R3", "SIM", "MS SQL"];
+      if (!VALID_TEAMS.includes(homeTeam)) {
+        return reply.status(400).send({ error: "Invalid team" });
+      }
+
+      const exists = db.get(sql.raw(`SELECT ros_id FROM person WHERE ros_id = '${rosId}'`));
+      if (!exists) {
+        return reply.status(404).send({ error: "Person not found" });
+      }
+
+      db.run(sql.raw(`UPDATE person SET home_team = '${homeTeam}' WHERE ros_id = '${rosId}'`));
+      audit(user.rosId, "person.homeTeam.set", rosId, { homeTeam });
+      return { ok: true };
+    },
+  );
 }

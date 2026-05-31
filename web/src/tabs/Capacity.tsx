@@ -3,6 +3,8 @@ import type { PlanResponse, Me } from "../api/types.js";
 import { TeamBadge } from "../components/ThemeChip.js";
 import { api } from "../api/client.js";
 
+const CANONICAL_TEAMS = ["RDB-KV", "RDB-PG", "EaaS", "RaaS", "QaaS", "R3", "SIM", "MS SQL"] as const;
+
 interface Props {
   plan: PlanResponse;
   me: Me;
@@ -49,6 +51,13 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
   async function handleAddAssignment(rosId: string, initiativeId: string, pct: number) {
     try {
       await api.assignments.upsert({ quarterId: plan.quarter.id, rosId, initiativeId, pct });
+      onReload();
+    } catch (e) { alert(e instanceof Error ? e.message : "Failed"); }
+  }
+
+  async function handleSetHomeTeam(rosId: string, homeTeam: string) {
+    try {
+      await api.people.setHomeTeam(rosId, homeTeam);
       onReload();
     } catch (e) { alert(e instanceof Error ? e.message : "Failed"); }
   }
@@ -155,7 +164,21 @@ export function Capacity({ plan, me, onReload, editMode }: Props) {
                         ? <><span className={`dot ${eng.balance === "balanced" ? "bal" : eng.balance === "over" ? "over" : "under"}`} />{eng.name}</>
                         : <span style={{ color: "var(--muted-2)", letterSpacing: 2 }}>••••</span>}
                     </td>
-                    <td>{eng.homeTeam}</td>
+                    <td>
+                      {canEdit && me.role === "admin" ? (
+                        <select
+                          value={eng.homeTeam}
+                          onChange={(e) => handleSetHomeTeam(eng.rosId, e.target.value)}
+                          style={{ fontSize: 12, padding: "2px 4px" }}
+                        >
+                          {CANONICAL_TEAMS.map((t) => (
+                            <option key={t} value={t}>{t}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        eng.homeTeam
+                      )}
+                    </td>
                     <td>
                       {visible ? (
                         <>
