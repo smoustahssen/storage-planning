@@ -44,32 +44,29 @@ export function getPersonAvailability(rosId: string): number {
   return row?.avail ?? 0;
 }
 
-// ─── Home HC for a team: sum of availability of active people on that team ───
+// ─── Home HC for a team: count of active ICs on that team ───────────────────
 
 export function homeHC(quarterId: string): Record<string, number> {
   const rows = db.all<{ team: string; hc: number }>(sql.raw(`
-    SELECT p.home_team AS team,
-           SUM(${AVAILABILITY_SQL}) AS hc
+    SELECT p.home_team AS team, COUNT(*) AS hc
     FROM person p
-    LEFT JOIN availability_override ao ON ao.ros_id = p.ros_id
-    WHERE p.active = 1
+    WHERE p.active = 1 AND p.role = 'IC'
     GROUP BY p.home_team
   `));
   const out: Record<string, number> = {};
-  for (const r of rows) out[r.team] = Number(r.hc.toFixed(2));
+  for (const r of rows) out[r.team] = r.hc;
   return out;
 }
 
-// ─── Org capacity: sum of all active person availability ────────────────────
+// ─── Org capacity: count of all active ICs ───────────────────────────────────
 
 export function orgCapacity(): number {
   const row = db.get<{ cap: number }>(sql.raw(`
-    SELECT SUM(${AVAILABILITY_SQL}) AS cap
+    SELECT COUNT(*) AS cap
     FROM person p
-    LEFT JOIN availability_override ao ON ao.ros_id = p.ros_id
-    WHERE p.active = 1
+    WHERE p.active = 1 AND p.role = 'IC'
   `));
-  return Number((row?.cap ?? 0).toFixed(2));
+  return row?.cap ?? 0;
 }
 
 // ─── Initiative HC: sum of pct for all assignments on that initiative ────────
