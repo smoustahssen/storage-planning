@@ -601,7 +601,7 @@ body[data-edit="true"] .prio .pl .rm { visibility:visible; }
 /* ── Change log ──────────────────────────────────────────────────────────── */
 .logrow { display:flex; gap:12px; padding:10px 16px; border-bottom:1px solid #f0ece2; font-size:11.5px; align-items:flex-start; }
 .logrow:last-child { border-bottom:0; }
-.logrow .who { width:90px; flex:0 0 90px; font-weight:600; }
+.logrow .who { width:140px; flex:0 0 140px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .logrow .when { margin-left:auto; color:var(--muted-2); font-size:10px; white-space:nowrap; }
 .logrow b { font-weight:600; }
 .revoke { font-size:10.5px; color:var(--red); background:var(--red-soft); border:0; border-radius:6px; padding:5px 9px; cursor:pointer; }

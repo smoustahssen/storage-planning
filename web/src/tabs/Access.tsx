@@ -263,7 +263,7 @@ export function Access({ quarterId, me }: Props) {
               const desc = describeEntry(entry.action, d);
               return (
                 <div key={entry.id} className="logrow">
-                  <span className="who">{entry.actorName ?? entry.actorRosId}</span>
+                  <span className="who">{(entry.actorName ?? entry.actorRosId).replace(/@roblox\.com$/, "")}</span>
                   <span style={{ flex: 1 }}>{desc}</span>
                   <span className="when" title={new Date(entry.ts).toLocaleString()}>{timeAgo(entry.ts)}</span>
                 </div>
