@@ -118,7 +118,7 @@ async function seed() {
 
   // ── Quarters ───────────────────────────────────────────────────────────
   const quarters = [
-    { id: "2026Q2", label: "Q2 2026", state: "previous", locked: 1 },
+    { id: "2026Q2", label: "Q2 2026", state: "previous", locked: 0 },
     { id: "2026Q3", label: "Q3 2026", state: "current",  locked: 0 },
     { id: "2026Q4", label: "Q4 2026", state: "draft",    locked: 0 },
   ];
