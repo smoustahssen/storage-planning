@@ -1,7 +1,7 @@
 {
   "name": "Storage Planner",
   "postCreateCommand": "npm install",
-  "postStartCommand": "npm run dev --workspace=server > /tmp/server.log 2>&1 &",
+  "postStartCommand": "sleep 5 && cd /workspaces/storage-planning && npm run dev --workspace=server > /tmp/server.log 2>&1 &",
   "forwardPorts": [3001],
   "portsAttributes": {
     "3001": {
