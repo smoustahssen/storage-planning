@@ -41,7 +41,7 @@ function canEditByScope(me: Me, plan: PlanResponse, teamOrInitId: string): boole
 
 export function Capacity({ plan, me, onReload, editMode }: Props) {
   const { derived } = plan;
-  const canEdit = editMode && (me.role === "admin" || me.role === "editor") && !plan.quarter.locked;
+  const canEdit = editMode && (me.role === "admin" || me.role === "editor");
 
   async function handleRemoveAssignment(assignmentId: string) {
     try { await api.assignments.delete(assignmentId); onReload(); }
