@@ -1,0 +1,13 @@
+{
+  "name": "Storage Planner",
+  "postCreateCommand": "npm install",
+  "postStartCommand": "npm run dev --workspace=server > /tmp/server.log 2>&1 &",
+  "forwardPorts": [3001],
+  "portsAttributes": {
+    "3001": {
+      "visibility": "public",
+      "label": "Storage Planner",
+      "onAutoForward": "silent"
+    }
+  }
+}
