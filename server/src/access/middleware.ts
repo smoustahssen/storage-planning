@@ -95,8 +95,8 @@ export function isQuarterWritable(
   locked: boolean,
   stateChange: boolean,
 ): boolean {
-  if (locked && !stateChange) return false;
-  if (locked && stateChange) return user.role === "admin";
+  if (user.role === "admin") return true;
+  if (locked) return false;
   return true;
 }
 
